@@ -1,0 +1,9 @@
+Future Enhancements to be made
+
+1. Real-time traffic monitoring using camera feeds
+2. Emergency vehicle (ambulance) priority system
+3. Lane-wise vehicle detection and optimization
+4. Weather-based traffic adjustments
+5. Fully real-time dashboard (WebSocket-based)
+
+Note: This is version 1 of the project.. Version 2 including the above mentioned enhancements will be released soon.
