@@ -454,5 +454,4 @@ Built  by **Ujjwal Khanna & Pritam Patra**
 ---
 
 
-
-This project is provided for **educational and research purposes**.
+This is a final year project (Senior design project) for the academic year 2025-2026.
