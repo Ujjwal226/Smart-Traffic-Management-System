@@ -1,0 +1,17 @@
+# Dataset Configuration for TrafficFlow AI Fine-Tuning
+# ---------------------------------------------------
+# Use this file to fine-tune YOLOv8 on specific traffic
+# cameras, lighting conditions, or distinct vehicle types.
+
+path: ./traffic_dataset  # dataset root dir (relative to this file, or absolute)
+train: images/train      # train images (relative to 'path')
+val: images/val          # val images (relative to 'path')
+
+# Classes to detect 
+# Note: For custom traffic flow, you might want to merge buses and trucks,
+# or add special local vehicle types (e.g., auto-rickshaws, trams).
+names:
+  0: car
+  1: motorcycle
+  2: bus
+  3: truck

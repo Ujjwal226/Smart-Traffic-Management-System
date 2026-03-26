@@ -1,0 +1,8 @@
+<viewsettings>
+    <!-- Use the built-in "real world" coloring scheme -->
+    <scheme name="real world"/>
+    
+    <!-- Add some small visual enhancements -->
+    <viewport zoom="1500" x="4000" y="4000"/>
+    <delay value="10"/> <!-- Small delay to make cars look smoother instead of instant jumps -->
+</viewsettings>
