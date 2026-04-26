@@ -1,20 +1,27 @@
 """
-TrafficFlow Simulation Engine v2.0
+TrafficFlow Simulation Engine v2.2
 - Smart adaptive signal control (queue + wait time + density scoring)
 - Green Wave corridor coordination
 - Vision module integration (optional)
 - CO2 tracking and results output
 
---- NEW FEATURES (v2.1) ---
-- Emergency Vehicle Priority System (Feature 1)
-- Multi-Lane Traffic System (Feature 2)
-- Traffic Efficiency Score (Feature 3)
+--- FEATURES (v2.1) ---
+- Emergency Vehicle Priority System (random trigger)
+- Multi-Lane Traffic System
+- Traffic Efficiency Score
+
+--- NEW FEATURES (v2.2) ---
+- Feature 1: Multi-Junction Traffic Control (enhanced logging)
+- Feature 2: Green Wave Coordination (enhanced logging)
+- Feature 3: Visual Ambulance in SUMO (real traci.vehicle.add)
+- Feature 4: Slow Down Simulation for GUI observation
+- Feature 5: Real-Time Dashboard Updates (periodic results.json writes)
 """
 import os
 import sys
 import json
 import time
-import random  # NEW: for emergency vehicle and multi-lane simulation
+import random
 
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -24,14 +31,17 @@ import traci
 from green_wave import detect_corridors, apply_green_wave, get_corridor_info
 
 # ── Mode Selection ────────────────────────────────────────
-# "adaptive"      → Smart scoring (queue + wait + density)
-# "static"        → Default fixed signal timings
-# "vision_linked" → Adaptive + live vehicle injection from camera
 MODE = os.environ.get("SIM_MODE", "adaptive")
 
 # ── GUI toggle ────────────────────────────────────────────
-# Set SIM_GUI=1 environment variable to open SUMO visual window
 USE_GUI = os.environ.get("SIM_GUI", "0") == "1"
+
+# ══════════════════════════════════════════════════════════
+# FEATURE 4: Simulation Speed Control 🐢
+# ══════════════════════════════════════════════════════════
+# Delay per step (seconds). Higher = slower & easier to observe in GUI.
+# Only active in GUI mode to avoid slowing headless runs.
+SIM_STEP_DELAY = 0.05 if USE_GUI else 0.0
 
 # ── Start SUMO ────────────────────────────────────────────
 if not os.path.exists(config.SIM_CONFIG):
@@ -40,44 +50,41 @@ if not os.path.exists(config.SIM_CONFIG):
 sumo_binary = config.SUMO_GUI_BIN if USE_GUI else config.SUMO_BIN
 sumoCmd = [sumo_binary, "-c", config.SIM_CONFIG]
 if USE_GUI:
-    sumoCmd += ["--start", "--quit-on-end"]  # auto-start, auto-close
+    sumoCmd += ["--start", "--quit-on-end"]
 traci.start(sumoCmd)
 print("✅ SUMO Simulation Started" + (" (GUI mode)" if USE_GUI else " (headless)"))
 
-# ── Discover Traffic Lights ───────────────────────────────
+# ══════════════════════════════════════════════════════════
+# FEATURE 1: Multi-Junction Traffic Control 🚦
+# ══════════════════════════════════════════════════════════
 traffic_lights = traci.trafficlight.getIDList()
 if not traffic_lights:
     print("❌ No traffic lights found.")
     traci.close()
     sys.exit()
 
-print(f"🚦 Found {len(traffic_lights)} traffic lights")
-print(f"🔧 Running in {MODE.upper()} mode\n")
+# Enhanced junction discovery logging
+print(f"\n🚦 Total junctions detected: {len(traffic_lights)}")
+for idx, tl_id in enumerate(traffic_lights):
+    controlled_lanes = traci.trafficlight.getControlledLanes(tl_id)
+    print(f"   Junction {idx+1}: {tl_id} — controls {len(set(controlled_lanes))} lanes")
+print(f"\n🔧 Running in {MODE.upper()} mode")
 
 
-# ══════════════════════════════════════════════════════════
-# FEATURE 2: Multi-Lane Traffic System 🚗
-# ══════════════════════════════════════════════════════════
-# Configuration: number of lanes per direction
+# ── Multi-Lane Traffic System 🚗 ─────────────────────────
 LANE_CONFIG = {
     "north": 3,
     "south": 2,
     "east": 4,
     "west": 3,
 }
-
 DIRECTIONS = list(LANE_CONFIG.keys())
 
 
 def simulate_multi_lane_traffic():
-    """
-    Simulate per-lane vehicle counts for each direction.
-    Returns a dict with lane-wise counts and aggregated totals.
-    Example: {"north": {"lanes": [10, 5, 7], "total": 22}, ...}
-    """
+    """Simulate per-lane vehicle counts for each direction."""
     lane_data = {}
     for direction, num_lanes in LANE_CONFIG.items():
-        # Random vehicle count per lane (0-20 vehicles)
         lane_counts = [random.randint(0, 20) for _ in range(num_lanes)]
         lane_data[direction] = {
             "lanes": lane_counts,
@@ -93,22 +100,15 @@ def log_multi_lane(lane_data):
         print(f"    {direction.upper()} lanes: {info['lanes']} → Total: {info['total']}")
 
 
-# ══════════════════════════════════════════════════════════
-# FEATURE 1: Emergency Vehicle Priority System 🚑
-# ══════════════════════════════════════════════════════════
-EMERGENCY_PROBABILITY = 0.03  # 3% chance per check cycle
-
-# Track emergency state across the simulation
+# ── Emergency Vehicle Priority (random trigger) 🚑 ───────
+EMERGENCY_PROBABILITY = 0.03
 emergency_active = False
 emergency_direction = None
-emergency_events = []  # Log of all emergency events for the dashboard
+emergency_events = []
 
 
 def check_emergency_vehicle():
-    """
-    Simulate ambulance detection with a low random probability.
-    Returns (is_detected: bool, direction: str or None).
-    """
+    """Simulate ambulance detection with a low random probability."""
     if random.random() < EMERGENCY_PROBABILITY:
         direction = random.choice(DIRECTIONS)
         return True, direction
@@ -116,35 +116,146 @@ def check_emergency_vehicle():
 
 
 def handle_emergency_priority(tl_id, direction, traci_module):
-    """
-    Override normal signal logic: force green for the emergency direction.
-    Uses the first green phase available on the traffic light.
-    """
+    """Override normal signal logic: force green for the emergency direction."""
     try:
         logic = traci_module.trafficlight.getAllProgramLogics(tl_id)
         if not logic:
             return
         phases = logic[0].phases
-        # Find the first phase with green
         green_phases = [i for i, p in enumerate(phases) if 'G' in p.state]
         if green_phases:
             traci_module.trafficlight.setPhase(tl_id, green_phases[0])
-            traci_module.trafficlight.setPhaseDuration(tl_id, 60)  # Extended green
+            traci_module.trafficlight.setPhaseDuration(tl_id, 60)
     except Exception:
         pass
 
 
 # ══════════════════════════════════════════════════════════
-# FEATURE 3: Traffic Efficiency Score 📊
+# FEATURE 3: Visual Ambulance in SUMO 🚑
 # ══════════════════════════════════════════════════════════
+AMBULANCE_INJECT_STEP = 300   # Step at which to inject ambulance
+AMBULANCE_SPEED = 20.0        # m/s (~72 km/h) — fast priority speed
+ambulance_injected = False
+ambulance_in_sim = False
+ambulance_route_edges = None  # Will be set dynamically
+
+
+def get_long_route_edges():
+    """
+    Find a long route from the existing vehicles' routes.
+    We pick the longest multi-edge route to give the ambulance
+    a meaningful path through several junctions.
+    """
+    best_edges = None
+    best_len = 0
+    for veh_id in traci.vehicle.getIDList():
+        try:
+            route = traci.vehicle.getRoute(veh_id)
+            if len(route) > best_len:
+                best_len = len(route)
+                best_edges = list(route)
+        except Exception:
+            continue
+    # Fallback: use a known long route from the route file
+    if not best_edges or best_len < 3:
+        best_edges = [
+            "563679820#0", "563679820#1", "563679820#2", "563679820#3",
+            "996679780#1", "996679780#2", "563974735",
+        ]
+    return best_edges
+
+
+def inject_ambulance(step):
+    """
+    Add a real ambulance vehicle into the SUMO simulation.
+    - Unique ID: 'ambulance_1'
+    - Red color (255, 0, 0)
+    - High speed
+    """
+    global ambulance_injected, ambulance_in_sim, ambulance_route_edges
+
+    if ambulance_injected:
+        return False
+
+    ambulance_route_edges = get_long_route_edges()
+
+    try:
+        # Add a route for the ambulance
+        traci.route.add("ambulance_route", ambulance_route_edges)
+        # Add the ambulance vehicle
+        traci.vehicle.add(
+            vehID="ambulance_1",
+            routeID="ambulance_route",
+            typeID="DEFAULT_VEHTYPE",
+            depart="now",
+        )
+        # Set ambulance visual properties
+        traci.vehicle.setColor("ambulance_1", (255, 0, 0, 255))  # Bright red
+        traci.vehicle.setSpeedMode("ambulance_1", 0)  # Disable all speed checks
+        traci.vehicle.setSpeed("ambulance_1", AMBULANCE_SPEED)
+
+        ambulance_injected = True
+        ambulance_in_sim = True
+
+        print(f"\n  🚑 VISUAL AMBULANCE INJECTED at step {step}")
+        print(f"  🚑 Ambulance moving through simulation")
+        print(f"  📍 Route: {' → '.join(ambulance_route_edges[:4])}...")
+        return True
+    except Exception as e:
+        print(f"  ⚠️  Failed to inject ambulance: {e}")
+        return False
+
+
+def clear_path_for_ambulance():
+    """
+    Detect ambulance position and turn all upcoming traffic lights
+    GREEN along its path. This implements PRIORITY ROUTE CLEARING.
+    """
+    global ambulance_in_sim
+
+    try:
+        # Check if ambulance is still in the simulation
+        if "ambulance_1" not in traci.vehicle.getIDList():
+            if ambulance_in_sim:
+                print("  ✅ Ambulance has exited the simulation. Path clearing ended.")
+                ambulance_in_sim = False
+            return False
+
+        # Get the ambulance's current road (edge)
+        current_edge = traci.vehicle.getRoadID("ambulance_1")
+        upcoming_route = traci.vehicle.getRoute("ambulance_1")
+
+        # Find which traffic lights are on the ambulance's remaining route
+        cleared_count = 0
+        for tl_id in traffic_lights:
+            controlled_lanes = set(traci.trafficlight.getControlledLanes(tl_id))
+            # Extract edge IDs from lane IDs
+            controlled_edges = set()
+            for lane in controlled_lanes:
+                parts = lane.rsplit("_", 1)
+                if len(parts) == 2:
+                    controlled_edges.add(parts[0])
+
+            # If this TL controls an edge on the ambulance's route, force green
+            if controlled_edges & set(upcoming_route):
+                handle_emergency_priority(tl_id, None, traci)
+                cleared_count += 1
+
+        if cleared_count > 0:
+            print(f"  🚦 Clearing path for emergency vehicle — {cleared_count} signals overridden")
+        return True
+
+    except Exception:
+        ambulance_in_sim = False
+        return False
+
+
+# ── Traffic Efficiency Score 📊 ───────────────────────────
 def calculate_efficiency(active_vehicles, idle_vehicles):
-    """
-    Calculate traffic efficiency as (moving / total) * 100.
-    Moving vehicles = active - idle (those not halted).
-    """
+    """Calculate traffic efficiency as (moving / total) * 100."""
     total = active_vehicles
     if total <= 0:
-        return 100.0  # No vehicles = perfect efficiency
+        return 100.0
     moving = max(total - idle_vehicles, 0)
     efficiency = (moving / total) * 100
     return round(efficiency, 2)
@@ -159,40 +270,28 @@ class TrafficController:
         self.lanes = list(set(traci.trafficlight.getControlledLanes(tl_id)))
 
     def get_vehicle_density(self):
-        """Count vehicles on controlled lanes."""
         return sum(traci.lane.getLastStepVehicleNumber(l) for l in self.lanes)
 
     def get_queue_length(self):
-        """Count halted vehicles (speed < 0.1 m/s) on controlled lanes."""
         return sum(traci.lane.getLastStepHaltingNumber(l) for l in self.lanes)
 
     def get_waiting_time(self):
-        """Total waiting time across controlled lanes."""
         return sum(traci.lane.getWaitingTime(l) for l in self.lanes)
 
     def compute_score(self):
-        """
-        Multi-factor score combining density, queue, and wait time.
-        Higher score = more congested = needs longer green.
-        """
         density = self.get_vehicle_density()
         queue = self.get_queue_length()
         wait = self.get_waiting_time()
-
         score = (queue * 2.0) + (wait * 1.5) + (density * 1.0)
         return score, density, queue, wait
 
     def optimize_signal(self, lane_data=None):
-        """
-        Set green phase duration based on multi-factor score.
-        MODIFIED: optionally factor in aggregated multi-lane totals.
-        """
+        """Set green phase duration based on multi-factor score."""
         score, density, queue, wait = self.compute_score()
 
-        # FEATURE 2 INTEGRATION: boost score if multi-lane data shows heavy load
+        # Multi-lane boost
         if lane_data:
             max_direction_total = max(info["total"] for info in lane_data.values())
-            # Add a lane-based bonus so the signal reacts to high directional volume
             score += max_direction_total * 0.5
 
         if score > 100:
@@ -210,15 +309,24 @@ class TrafficController:
         return score, duration
 
 
+# Create one controller per junction (independent control)
 controllers = [TrafficController(tl) for tl in traffic_lights]
 
-# ── Green Wave Setup ──────────────────────────────────────
+# ══════════════════════════════════════════════════════════
+# FEATURE 2: Green Wave Coordination 🌊
+# ══════════════════════════════════════════════════════════
 corridors = detect_corridors(traci)
 if corridors:
-    print(f"🌊 Detected {len(corridors)} Green Wave corridors")
+    print(f"\n🌊 Green Wave Coordination Active")
+    print(f"   Detected {len(corridors)} corridor(s)")
+    for ci, corridor in enumerate(corridors):
+        print(f"   Corridor {ci+1}: {len(corridor)} junctions — offsets: ", end="")
+        offsets = [f"{i*5}s" for i in range(len(corridor))]
+        print(", ".join(offsets))
     apply_green_wave(traci, corridors)
+    print("   ✅ Phase offsets applied — signals will NOT switch simultaneously")
 else:
-    print("ℹ️  No Green Wave corridors detected (independent intersections)")
+    print("\nℹ️  No Green Wave corridors detected (independent intersections)")
 
 # ── Vision Link (optional) ────────────────────────────────
 if MODE == "vision_linked":
@@ -233,22 +341,79 @@ if MODE == "vision_linked":
 # ── Performance Metrics ───────────────────────────────────
 total_delay = 0
 vehicle_set = set()
-step_data = []          # Per-step metrics for dashboard
-baseline_idle = 0       # For CO2 calculation
+step_data = []
+baseline_idle = 0
 ai_idle = 0
-
-# NEW: Track efficiency and lane data across the simulation
 efficiency_history = []
 latest_lane_data = {}
 latest_efficiency = 100.0
 
+# Track per-junction signal changes for dashboard
+junction_signal_log = []
+
+
+# ══════════════════════════════════════════════════════════
+# FEATURE 5: Real-Time Dashboard Updates 📊
+# ══════════════════════════════════════════════════════════
+def save_live_results(step, sim_start):
+    """
+    Write current results to results.json mid-simulation so the
+    dashboard can display live progress.
+    """
+    sim_duration = time.time() - sim_start
+    num_vehicles = len(vehicle_set)
+    avg_delay = total_delay / num_vehicles if num_vehicles > 0 else 0
+    avg_eff = sum(efficiency_history) / len(efficiency_history) if efficiency_history else 0.0
+
+    live_results = {
+        "mode": MODE,
+        "simulation_steps": step,
+        "wall_clock_seconds": round(sim_duration, 1),
+        "total_vehicles": num_vehicles,
+        "total_delay": total_delay,
+        "avg_delay_per_vehicle": round(avg_delay, 2),
+        "baseline_idle_time": baseline_idle if MODE == "static" else int(ai_idle * 1.4),
+        "ai_idle_time": ai_idle,
+        "idle_time_saved": max(int(ai_idle * 1.4) - ai_idle, 0) if MODE != "static" else max(baseline_idle - ai_idle, 0),
+        "saved_co2_kg": round(max(int(ai_idle * 1.4) - ai_idle, 0) * config.EMISSION_FACTOR, 2) if MODE != "static" else 0,
+        "emission_factor": config.EMISSION_FACTOR,
+        "traffic_lights_count": len(traffic_lights),
+        "corridors": [],  # Skip heavy computation during live updates
+        "step_data": step_data,
+        "emergency_events": emergency_events,
+        "emergency_active": emergency_active,
+        "emergency_direction": emergency_direction,
+        "lane_config": LANE_CONFIG,
+        "lane_data": latest_lane_data,
+        "efficiency": round(avg_eff, 2),
+        # NEW v2.2 fields
+        "ambulance_in_sim": ambulance_in_sim,
+        "ambulance_injected": ambulance_injected,
+        "junction_count": len(traffic_lights),
+        "corridor_count": len(corridors),
+        "simulation_live": True,  # Flag: dashboard knows sim is running
+    }
+    try:
+        with open(config.RESULTS_FILE, "w") as f:
+            json.dump(live_results, f, indent=2)
+    except Exception:
+        pass  # Don't crash the simulation if file write fails
+
+
 # ── Simulation Loop ──────────────────────────────────────
 sim_start = time.time()
 step = 0
+print(f"\n{'─'*50}")
+print("  🏁 Simulation Loop Started")
+print(f"{'─'*50}\n")
 
 while traci.simulation.getMinExpectedNumber() > 0:
     traci.simulationStep()
     step += 1
+
+    # ── FEATURE 4: Slow down for GUI observation ──
+    if SIM_STEP_DELAY > 0:
+        time.sleep(SIM_STEP_DELAY)
 
     # ── Delay tracking ──
     step_idle = 0
@@ -264,11 +429,11 @@ while traci.simulation.getMinExpectedNumber() > 0:
     else:
         ai_idle += step_idle
 
-    # ── FEATURE 2: Multi-lane simulation (every 20 steps) ──
+    # ── Multi-lane simulation (every 20 steps) ──
     if step % 20 == 0:
         latest_lane_data = simulate_multi_lane_traffic()
 
-    # ── FEATURE 1: Emergency vehicle check (every 50 steps) ──
+    # ── Emergency vehicle check — random trigger (every 50 steps) ──
     if step % 50 == 0:
         detected, emg_direction = check_emergency_vehicle()
         if detected:
@@ -276,27 +441,45 @@ while traci.simulation.getMinExpectedNumber() > 0:
             emergency_direction = emg_direction
             print(f"\n  🚑 Ambulance detected at {emg_direction.upper()}")
             print(f"  🚦 PRIORITY MODE ACTIVATED")
-            # Override ALL traffic lights to give priority
             for controller in controllers:
                 handle_emergency_priority(controller.tl_id, emg_direction, traci)
-            # Record the emergency event
             emergency_events.append({
                 "step": step,
                 "direction": emg_direction,
             })
         else:
-            # Return to normal if no emergency
             if emergency_active:
                 print(f"  ✅ Emergency handled. Returning to normal signal logic.")
                 emergency_active = False
                 emergency_direction = None
 
+    # ══════════════════════════════════════════════════════
+    # FEATURE 3: Visual Ambulance Injection & Path Clearing
+    # ══════════════════════════════════════════════════════
+    # Inject ambulance at the configured step
+    if step == AMBULANCE_INJECT_STEP:
+        inject_ambulance(step)
+
+    # If ambulance is in the simulation, clear its path every 10 steps
+    if ambulance_in_sim and step % 10 == 0:
+        clear_path_for_ambulance()
+
     # ── Adaptive control (every 20 steps) ──
-    # MODIFIED: pass lane_data to optimize_signal for Feature 2 integration
     if MODE in ("adaptive", "vision_linked") and step % 20 == 0:
-        if not emergency_active:  # Skip if emergency override is active
+        if not emergency_active and not ambulance_in_sim:
             for controller in controllers:
-                controller.optimize_signal(lane_data=latest_lane_data)
+                score, duration = controller.optimize_signal(lane_data=latest_lane_data)
+
+            # Log signal changes across junctions (every 100 steps)
+            if step % 100 == 0:
+                for controller in controllers:
+                    s, d = controller.optimize_signal(lane_data=latest_lane_data)
+                    junction_signal_log.append({
+                        "step": step,
+                        "junction": controller.tl_id,
+                        "score": round(s, 1),
+                        "green_duration": d,
+                    })
 
     # ── Vision-linked injection (every 30 steps) ──
     if MODE == "vision_linked" and step % 30 == 0:
@@ -307,7 +490,7 @@ while traci.simulation.getMinExpectedNumber() > 0:
         except Exception:
             pass
 
-    # ── FEATURE 3: Efficiency calculation (every 10 steps) ──
+    # ── Efficiency calculation (every 10 steps) ──
     active_vehicles = len(traci.vehicle.getIDList())
     if step % 10 == 0:
         latest_efficiency = calculate_efficiency(active_vehicles, step_idle)
@@ -320,14 +503,20 @@ while traci.simulation.getMinExpectedNumber() > 0:
             "active_vehicles": active_vehicles,
             "idle_vehicles": step_idle,
             "total_delay": total_delay,
-            "efficiency": latest_efficiency,  # NEW: per-step efficiency
+            "efficiency": latest_efficiency,
         })
+
+    # ══════════════════════════════════════════════════════
+    # FEATURE 5: Live results write (every 50 steps)
+    # ══════════════════════════════════════════════════════
+    if step % 50 == 0:
+        save_live_results(step, sim_start)
 
     # ── Progress log (every 200 steps) ──
     if step % 200 == 0:
         active = len(traci.vehicle.getIDList())
-        print(f"  Step {step:>5} | Active: {active:>4} | Delay: {total_delay:>6} | Efficiency: {latest_efficiency:.1f}%")
-        # Log multi-lane data every 200 steps
+        amb_status = " | 🚑 AMBULANCE ACTIVE" if ambulance_in_sim else ""
+        print(f"  Step {step:>5} | Active: {active:>4} | Delay: {total_delay:>6} | Eff: {latest_efficiency:.1f}%{amb_status}")
         if latest_lane_data:
             log_multi_lane(latest_lane_data)
 
@@ -336,20 +525,17 @@ sim_duration = time.time() - sim_start
 num_vehicles = len(vehicle_set)
 avg_delay = total_delay / num_vehicles if num_vehicles > 0 else 0
 
-# CO2 Calculation (FR-12)
-# If running adaptive mode, estimate baseline as 1.4× the adaptive idle
 if MODE != "static":
     baseline_idle = int(ai_idle * 1.4)
 
 saved_idle = max(baseline_idle - ai_idle, 0)
-saved_co2 = saved_idle * config.EMISSION_FACTOR  # kg CO2
+saved_co2 = saved_idle * config.EMISSION_FACTOR
 
-# FEATURE 3: Final efficiency score (average across simulation)
 avg_efficiency = sum(efficiency_history) / len(efficiency_history) if efficiency_history else 0.0
 
-print("\n" + "=" * 50)
-print("       PERFORMANCE SUMMARY")
-print("=" * 50)
+print("\n" + "=" * 55)
+print("          PERFORMANCE SUMMARY (v2.2)")
+print("=" * 55)
 print(f"  Mode:                    {MODE}")
 print(f"  Simulation Steps:        {step}")
 print(f"  Wall-Clock Time:         {sim_duration:.1f}s")
@@ -361,10 +547,13 @@ print(f"  AI-Optimized Idle Time:  {ai_idle}s")
 print(f"  Idle Time Saved:         {saved_idle}s")
 print(f"  🌿 CO2 Saved:            {saved_co2:.2f} kg")
 print(f"  📊 Traffic Efficiency:   {avg_efficiency:.1f}%")
+print(f"  🚦 Junctions Controlled: {len(traffic_lights)}")
+print(f"  🌊 Green Wave Corridors: {len(corridors)}")
 print(f"  🚑 Emergency Events:     {len(emergency_events)}")
-print("=" * 50)
+print(f"  🚑 Ambulance Injected:   {'Yes' if ambulance_injected else 'No'}")
+print("=" * 55)
 
-# ── Save Results for Dashboard ────────────────────────────
+# ── Save Final Results for Dashboard ──────────────────────
 results = {
     "mode": MODE,
     "simulation_steps": step,
@@ -380,18 +569,22 @@ results = {
     "traffic_lights_count": len(traffic_lights),
     "corridors": get_corridor_info(traci),
     "step_data": step_data,
-
-    # ── NEW: Feature 1 – Emergency Vehicle Data ──
+    # Emergency data
     "emergency_events": emergency_events,
     "emergency_active": emergency_active,
     "emergency_direction": emergency_direction,
-
-    # ── NEW: Feature 2 – Multi-Lane Data (last snapshot) ──
+    # Multi-lane data
     "lane_config": LANE_CONFIG,
     "lane_data": latest_lane_data,
-
-    # ── NEW: Feature 3 – Efficiency Score ──
+    # Efficiency
     "efficiency": round(avg_efficiency, 2),
+    # v2.2 additions
+    "ambulance_in_sim": False,  # Sim is over
+    "ambulance_injected": ambulance_injected,
+    "junction_count": len(traffic_lights),
+    "corridor_count": len(corridors),
+    "junction_signal_log": junction_signal_log[-50:],  # Last 50 entries
+    "simulation_live": False,  # Sim finished
 }
 
 with open(config.RESULTS_FILE, "w") as f:

@@ -1,13 +1,13 @@
 """
-TrafficFlow AI – GreenWave Dashboard
-=====================================
+TrafficFlow AI – GreenWave Dashboard v2.2
+==========================================
 Streamlit-based real-time monitoring & analytics dashboard.
 Launch:  streamlit run dashboard/app.py
 
---- UPDATED (v2.1) ---
-- Efficiency display metric (Feature 3)
-- Lane-wise bar chart (Feature 2)
-- Ambulance alert message (Feature 1)
+--- v2.2 Updates ---
+- Feature 5: Real-time auto-refresh (2s) with live indicator
+- Ambulance-in-simulation visual alert
+- Junction signal log viewer
 """
 import sys, os, json, time, math
 import streamlit as st
@@ -57,10 +57,7 @@ st.markdown("""
         font-weight: 700;
         line-height: 1.2;
     }
-    .metric-card .delta {
-        font-size: 0.9rem;
-        margin-top: 4px;
-    }
+    .metric-card .delta { font-size: 0.9rem; margin-top: 4px; }
     .delta-good { color: #64ffda; }
     .delta-bad  { color: #ff6b6b; }
     .stApp { background-color: #0a0a23; }
@@ -68,7 +65,6 @@ st.markdown("""
     .block-container { padding-top: 1rem; }
     h1, h2, h3 { color: #ccd6f6 !important; }
     .sidebar .sidebar-content { background-color: #112240; }
-    /* NEW: Emergency alert styling */
     .emergency-alert {
         background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
         border-radius: 12px;
@@ -86,18 +82,54 @@ st.markdown("""
         50% { box-shadow: 0 4px 30px rgba(255,65,108,0.7); }
         100% { box-shadow: 0 4px 20px rgba(255,65,108,0.4); }
     }
+    /* NEW: Live simulation indicator */
+    .live-indicator {
+        background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+        border-radius: 12px;
+        padding: 12px 20px;
+        text-align: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 12px;
+        animation: live-pulse 1.5s infinite;
+    }
+    @keyframes live-pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.7; }
+        100% { opacity: 1; }
+    }
+    /* NEW: Ambulance in-simulation alert */
+    .ambulance-sim-alert {
+        background: linear-gradient(135deg, #e17055 0%, #d63031 100%);
+        border-radius: 12px;
+        padding: 14px 20px;
+        text-align: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 12px;
+        animation: amb-flash 1s infinite;
+    }
+    @keyframes amb-flash {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
 </style>
 """, unsafe_allow_html=True)
 
 
-# ── Helper: load results ────────────────────────────────
-@st.cache_data(ttl=5)
+# ── Helper: load results (no cache for live mode) ────────
 def load_results():
-    """Load simulation results from JSON."""
+    """Load simulation results from JSON (uncached for real-time updates)."""
     if not os.path.exists(RESULTS_FILE):
         return None
-    with open(RESULTS_FILE) as f:
-        return json.load(f)
+    try:
+        with open(RESULTS_FILE) as f:
+            return json.load(f)
+    except (json.JSONDecodeError, IOError):
+        return None
 
 
 def metric_card(label, value, delta=None, delta_good=True):
@@ -130,9 +162,12 @@ with st.sidebar:
     )
     st.divider()
 
-    auto_refresh = st.toggle("🔄 Auto-Refresh (5s)", value=False)
+    # ══════════════════════════════════════════════════════
+    # FEATURE 5: Real-Time Dashboard — 2-second refresh
+    # ══════════════════════════════════════════════════════
+    auto_refresh = st.toggle("🔄 Auto-Refresh (2s)", value=False)
     if auto_refresh:
-        time.sleep(5)
+        time.sleep(2)
         st.rerun()
 
     st.divider()
@@ -150,8 +185,27 @@ if data is None:
     st.stop()
 
 # ══════════════════════════════════════════════════════════
-# FEATURE 1: Ambulance Alert Banner (if active/recent)
+# FEATURE 5: Live simulation indicator
 # ══════════════════════════════════════════════════════════
+is_live = data.get("simulation_live", False)
+if is_live:
+    st.markdown(
+        '<div class="live-indicator">'
+        '🔄 Live Simulation Running — Dashboard auto-updating'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+# ── Ambulance in-simulation alert ────────────────────────
+if data.get("ambulance_in_sim", False):
+    st.markdown(
+        '<div class="ambulance-sim-alert">'
+        '🚑 AMBULANCE ACTIVE IN SIMULATION — Priority route clearing in progress'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+# ── Emergency events alert banner ────────────────────────
 emergency_events = data.get("emergency_events", [])
 if emergency_events:
     last_event = emergency_events[-1]
@@ -166,7 +220,11 @@ if emergency_events:
 
 # ── Header ───────────────────────────────────────────────
 st.markdown("# 🚦 TrafficFlow AI – GreenWave Dashboard")
-st.caption(f"Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  •  Mode: **{data.get('mode', 'N/A').upper()}**")
+live_badge = "  •  🟢 **LIVE**" if is_live else ""
+st.caption(
+    f"Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  •  "
+    f"Mode: **{data.get('mode', 'N/A').upper()}**{live_badge}"
+)
 
 # ── KPI Cards Row ────────────────────────────────────────
 k1, k2, k3, k4, k5 = st.columns(5)
@@ -203,9 +261,6 @@ with k4:
         f"{data['simulation_steps']/max(perf,1):.0f} steps/sec",
     )
 
-# ══════════════════════════════════════════════════════════
-# FEATURE 3: Efficiency KPI Card
-# ══════════════════════════════════════════════════════════
 with k5:
     eff = data.get("efficiency", 0)
     metric_card(
@@ -217,16 +272,13 @@ with k5:
 
 st.divider()
 
-# ══════════════════════════════════════════════════════════
-# FEATURE 2: Lane-Wise Bar Chart
-# ══════════════════════════════════════════════════════════
+# ── Lane-Wise Bar Chart + Efficiency Over Time ───────────
 lane_data = data.get("lane_data", {})
 if lane_data:
     lane_col, eff_col = st.columns(2)
 
     with lane_col:
         st.subheader("🚗 Multi-Lane Traffic Distribution")
-        # Build a grouped bar chart: directions on X, one bar per lane
         bar_fig = go.Figure()
         colors = ["#64ffda", "#bd93f9", "#f8961e", "#ff6b6b"]
         max_lanes = max(len(info.get("lanes", [])) for info in lane_data.values())
@@ -260,7 +312,6 @@ if lane_data:
         )
         st.plotly_chart(bar_fig, use_container_width=True)
 
-    # Efficiency over time chart
     with eff_col:
         st.subheader("📊 Traffic Efficiency Over Time")
         step_data_list = data.get("step_data", [])
@@ -298,7 +349,6 @@ if step_data:
 
     c1, c2 = st.columns(2)
 
-    # --- Active vs Idle Vehicles Over Time ---
     with c1:
         st.subheader("📊 Active vs Idle Vehicles")
         fig1 = go.Figure()
@@ -326,7 +376,6 @@ if step_data:
         )
         st.plotly_chart(fig1, use_container_width=True)
 
-    # --- Cumulative Delay ---
     with c2:
         st.subheader("⏱️ Cumulative Delay")
         fig2 = go.Figure()
@@ -528,15 +577,20 @@ except Exception as e:
 
 st.divider()
 
-# ══════════════════════════════════════════════════════════
-# FEATURE 1: Emergency Events Log
-# ══════════════════════════════════════════════════════════
+# ── Emergency Events Log ─────────────────────────────────
 if emergency_events:
     with st.expander("🚑 Emergency Vehicle Events Log"):
         emg_df = pd.DataFrame(emergency_events)
         emg_df.columns = ["Simulation Step", "Direction"]
         emg_df["Direction"] = emg_df["Direction"].str.upper()
         st.dataframe(emg_df, use_container_width=True, hide_index=True)
+
+# ── Junction Signal Log ──────────────────────────────────
+junction_log = data.get("junction_signal_log", [])
+if junction_log:
+    with st.expander("🚦 Junction Signal Change Log"):
+        jl_df = pd.DataFrame(junction_log)
+        st.dataframe(jl_df, use_container_width=True, hide_index=True)
 
 # ── Raw Data Explorer ────────────────────────────────────
 with st.expander("📋 Raw Simulation Results"):
@@ -557,7 +611,7 @@ with st.expander("📈 Step-by-Step Data Table"):
 st.markdown("---")
 st.markdown(
     '<div style="text-align:center; color:#a8b2d1; font-size:0.85rem;">'
-    '🚦 TrafficFlow AI GreenWave  •  Smart Adaptive Traffic Signal Control  •  '
+    '🚦 TrafficFlow AI GreenWave v2.2 •  Smart Adaptive Traffic Signal Control  •  '
     'Powered by SUMO + YOLOv8 + Streamlit'
     '</div>',
     unsafe_allow_html=True,
