@@ -3,6 +3,11 @@ TrafficFlow AI – GreenWave Dashboard
 =====================================
 Streamlit-based real-time monitoring & analytics dashboard.
 Launch:  streamlit run dashboard/app.py
+
+--- UPDATED (v2.1) ---
+- Efficiency display metric (Feature 3)
+- Lane-wise bar chart (Feature 2)
+- Ambulance alert message (Feature 1)
 """
 import sys, os, json, time, math
 import streamlit as st
@@ -12,12 +17,10 @@ import plotly.express as px
 from datetime import datetime
 
 # ── Project imports ──────────────────────────────────────
-# Graceful import: config may fail on Streamlit Cloud (no SUMO installed)
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 try:
     from config import RESULTS_FILE, VISION_API_PORT, PROJECT_ROOT
 except SystemExit:
-    # Fallback for Streamlit Cloud deployment (SUMO not available)
     PROJECT_ROOT = os.path.join(os.path.dirname(__file__), "..")
     RESULTS_FILE = os.path.join(PROJECT_ROOT, "results.json")
     VISION_API_PORT = 8000
@@ -33,7 +36,6 @@ st.set_page_config(
 # ── Custom CSS ───────────────────────────────────────────
 st.markdown("""
 <style>
-    /* Dark theme cards */
     .metric-card {
         background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
         border: 1px solid #0f3460;
@@ -66,12 +68,30 @@ st.markdown("""
     .block-container { padding-top: 1rem; }
     h1, h2, h3 { color: #ccd6f6 !important; }
     .sidebar .sidebar-content { background-color: #112240; }
+    /* NEW: Emergency alert styling */
+    .emergency-alert {
+        background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+        border-radius: 12px;
+        padding: 16px 24px;
+        text-align: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 16px;
+        animation: pulse 2s infinite;
+        box-shadow: 0 4px 20px rgba(255,65,108,0.4);
+    }
+    @keyframes pulse {
+        0% { box-shadow: 0 4px 20px rgba(255,65,108,0.4); }
+        50% { box-shadow: 0 4px 30px rgba(255,65,108,0.7); }
+        100% { box-shadow: 0 4px 20px rgba(255,65,108,0.4); }
+    }
 </style>
 """, unsafe_allow_html=True)
 
 
 # ── Helper: load results ────────────────────────────────
-@st.cache_data(ttl=5)   # auto-refresh every 5 s
+@st.cache_data(ttl=5)
 def load_results():
     """Load simulation results from JSON."""
     if not os.path.exists(RESULTS_FILE):
@@ -129,12 +149,27 @@ if data is None:
     st.code("python3 simulation_module/sim_engine.py", language="bash")
     st.stop()
 
+# ══════════════════════════════════════════════════════════
+# FEATURE 1: Ambulance Alert Banner (if active/recent)
+# ══════════════════════════════════════════════════════════
+emergency_events = data.get("emergency_events", [])
+if emergency_events:
+    last_event = emergency_events[-1]
+    st.markdown(
+        f'<div class="emergency-alert">'
+        f'🚑 AMBULANCE ALERT — Last detected at <b>{last_event["direction"].upper()}</b> '
+        f'(step {last_event["step"]}) &nbsp;|&nbsp; '
+        f'Total emergency events: {len(emergency_events)}'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
 # ── Header ───────────────────────────────────────────────
 st.markdown("# 🚦 TrafficFlow AI – GreenWave Dashboard")
 st.caption(f"Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  •  Mode: **{data.get('mode', 'N/A').upper()}**")
 
 # ── KPI Cards Row ────────────────────────────────────────
-k1, k2, k3, k4 = st.columns(4)
+k1, k2, k3, k4, k5 = st.columns(5)
 
 with k1:
     metric_card(
@@ -147,7 +182,7 @@ with k2:
     metric_card(
         "CO₂ Saved",
         f"{data['saved_co2_kg']:.1f} kg",
-        f"↓ {data['saved_co2_kg']/data.get('baseline_idle_time',1)*100:.1f}% vs baseline",
+        f"↓ {data['saved_co2_kg']/max(data.get('baseline_idle_time',1),1)*100:.1f}% vs baseline",
         delta_good=True,
     )
 
@@ -168,7 +203,93 @@ with k4:
         f"{data['simulation_steps']/max(perf,1):.0f} steps/sec",
     )
 
+# ══════════════════════════════════════════════════════════
+# FEATURE 3: Efficiency KPI Card
+# ══════════════════════════════════════════════════════════
+with k5:
+    eff = data.get("efficiency", 0)
+    metric_card(
+        "Traffic Efficiency",
+        f"{eff:.1f}%",
+        "Higher is better",
+        delta_good=eff > 50,
+    )
+
 st.divider()
+
+# ══════════════════════════════════════════════════════════
+# FEATURE 2: Lane-Wise Bar Chart
+# ══════════════════════════════════════════════════════════
+lane_data = data.get("lane_data", {})
+if lane_data:
+    lane_col, eff_col = st.columns(2)
+
+    with lane_col:
+        st.subheader("🚗 Multi-Lane Traffic Distribution")
+        # Build a grouped bar chart: directions on X, one bar per lane
+        bar_fig = go.Figure()
+        colors = ["#64ffda", "#bd93f9", "#f8961e", "#ff6b6b"]
+        max_lanes = max(len(info.get("lanes", [])) for info in lane_data.values())
+
+        for lane_idx in range(max_lanes):
+            lane_values = []
+            directions = []
+            for d in ["north", "south", "east", "west"]:
+                info = lane_data.get(d, {})
+                lanes_list = info.get("lanes", [])
+                directions.append(d.upper())
+                lane_values.append(lanes_list[lane_idx] if lane_idx < len(lanes_list) else 0)
+
+            bar_fig.add_trace(go.Bar(
+                name=f"Lane {lane_idx + 1}",
+                x=directions,
+                y=lane_values,
+                marker_color=colors[lane_idx % len(colors)],
+            ))
+
+        bar_fig.update_layout(
+            barmode="group",
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            xaxis_title="Direction",
+            yaxis_title="Vehicle Count",
+            height=380,
+            margin=dict(l=40, r=20, t=30, b=40),
+            legend=dict(orientation="h", y=1.12),
+        )
+        st.plotly_chart(bar_fig, use_container_width=True)
+
+    # Efficiency over time chart
+    with eff_col:
+        st.subheader("📊 Traffic Efficiency Over Time")
+        step_data_list = data.get("step_data", [])
+        if step_data_list and "efficiency" in step_data_list[0]:
+            eff_df = pd.DataFrame(step_data_list)
+            fig_eff = go.Figure()
+            fig_eff.add_trace(go.Scatter(
+                x=eff_df["step"], y=eff_df["efficiency"],
+                mode="lines", name="Efficiency %",
+                line=dict(color="#64ffda", width=2),
+                fill="tozeroy", fillcolor="rgba(100,255,218,0.1)",
+            ))
+            fig_eff.add_hline(y=50, line_dash="dash", line_color="#ff6b6b",
+                              annotation_text="Low Efficiency Threshold",
+                              annotation_font_color="#ff6b6b")
+            fig_eff.update_layout(
+                template="plotly_dark",
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                xaxis_title="Simulation Step",
+                yaxis_title="Efficiency (%)",
+                height=380,
+                margin=dict(l=40, r=20, t=30, b=40),
+            )
+            st.plotly_chart(fig_eff, use_container_width=True)
+        else:
+            st.info("Efficiency data not yet available in step_data.")
+
+    st.divider()
 
 # ── Charts Row ───────────────────────────────────────────
 step_data = data.get("step_data", [])
@@ -264,7 +385,6 @@ with g1:
     )
     st.plotly_chart(fig_gauge, use_container_width=True)
 
-    # CO2 breakdown table
     co2_data = pd.DataFrame({
         "Metric": ["Baseline CO₂", "AI-Optimised CO₂", "CO₂ Saved", "Idle Time Saved"],
         "Value": [
@@ -280,7 +400,6 @@ with g2:
     st.subheader("🚗 Traffic Congestion Analysis")
 
     if step_data:
-        # Compute congestion ratio over time
         df["congestion_ratio"] = df["idle_vehicles"] / df["active_vehicles"].clip(lower=1)
 
         fig3 = go.Figure()
@@ -291,7 +410,6 @@ with g2:
             fill="tozeroy", fillcolor="rgba(248,150,30,0.1)",
             name="Congestion Ratio",
         ))
-        # Threshold line
         fig3.add_hline(
             y=0.8, line_dash="dash", line_color="#ff6b6b",
             annotation_text="High Congestion Threshold",
@@ -308,7 +426,6 @@ with g2:
         )
         st.plotly_chart(fig3, use_container_width=True)
 
-    # Congestion pie – high vs moderate vs clear
     if step_data:
         high = len(df[df["congestion_ratio"] >= 0.8])
         moderate = len(df[(df["congestion_ratio"] >= 0.4) & (df["congestion_ratio"] < 0.8)])
@@ -338,14 +455,12 @@ try:
     from streamlit_folium import st_folium
     import xml.etree.ElementTree as ET
 
-    # Parse SUMO net.xml for junction coords
     net_file = os.path.join(PROJECT_ROOT, "simulation_module", "osm.net.xml")
     junctions = []
     if os.path.exists(net_file):
         tree = ET.parse(net_file)
         root = tree.getroot()
 
-        # Get projection offset
         location = root.find("location")
         net_offset = [0.0, 0.0]
         orig_boundary = None
@@ -357,7 +472,6 @@ try:
             orig_boundary = location.get("origBoundary", "")
             conv_boundary = location.get("convBoundary", "")
 
-        # Extract junction positions
         for junc in root.findall("junction"):
             jtype = junc.get("type", "")
             if jtype == "traffic_light":
@@ -367,7 +481,6 @@ try:
                 junctions.append({"id": jid, "x": x, "y": y})
 
     if junctions and orig_boundary:
-        # Parse original boundary for lat/lon reference
         b = list(map(float, orig_boundary.split(",")))
         lon_min, lat_min, lon_max, lat_max = b[0], b[1], b[2], b[3]
         cb = list(map(float, conv_boundary.split(",")))
@@ -383,7 +496,6 @@ try:
         )
 
         for j in junctions:
-            # Convert SUMO coords to lat/lon using linear interpolation
             frac_x = (j["x"] - cx_min) / max(cx_max - cx_min, 1)
             frac_y = (j["y"] - cy_min) / max(cy_max - cy_min, 1)
             lat = lat_min + frac_y * (lat_max - lat_min)
@@ -415,6 +527,16 @@ except Exception as e:
     st.metric("Traffic Lights", data.get("traffic_lights_count", "N/A"))
 
 st.divider()
+
+# ══════════════════════════════════════════════════════════
+# FEATURE 1: Emergency Events Log
+# ══════════════════════════════════════════════════════════
+if emergency_events:
+    with st.expander("🚑 Emergency Vehicle Events Log"):
+        emg_df = pd.DataFrame(emergency_events)
+        emg_df.columns = ["Simulation Step", "Direction"]
+        emg_df["Direction"] = emg_df["Direction"].str.upper()
+        st.dataframe(emg_df, use_container_width=True, hide_index=True)
 
 # ── Raw Data Explorer ────────────────────────────────────
 with st.expander("📋 Raw Simulation Results"):
