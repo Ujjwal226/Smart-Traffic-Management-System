@@ -195,6 +195,46 @@ if data is None:
     st.stop()
 
 # ══════════════════════════════════════════════════════════
+# INCIDENT / ACCIDENT SIMULATION (DASHBOARD ONLY)
+# ══════════════════════════════════════════════════════════
+import random
+current_step = data.get("simulation_steps", 0)
+incident_active = (800 <= current_step <= 1000) or (1600 <= current_step <= 1800)
+
+if "prev_incident_state" not in st.session_state:
+    st.session_state.prev_incident_state = False
+
+if incident_active and not st.session_state.prev_incident_state:
+    print(f"⚠️ Incident triggered at step {current_step}")
+elif not incident_active and st.session_state.prev_incident_state:
+    print("✅ Incident cleared")
+
+st.session_state.prev_incident_state = incident_active
+
+st.sidebar.divider()
+if incident_active:
+    st.sidebar.error("🚨 Incident Status: ACTIVE")
+    st.error("⚠️ **Accident detected at EAST junction** - Expect severe delays and rerouting.")
+    
+    # Artificially modify current metrics for visual impact
+    if "efficiency" in data:
+        data["efficiency"] *= 0.7
+    if "avg_delay_per_vehicle" in data:
+        data["avg_delay_per_vehicle"] += random.uniform(15.0, 35.0)
+else:
+    st.sidebar.success("✅ Incident Status: NORMAL")
+
+# Artificially modify historical graph data for visual impact
+if "step_data" in data:
+    for step_entry in data["step_data"]:
+        s = step_entry.get("step", 0)
+        if (800 <= s <= 1000) or (1600 <= s <= 1800):
+            if "efficiency" in step_entry:
+                step_entry["efficiency"] *= 0.7
+            if "total_delay" in step_entry:
+                step_entry["total_delay"] *= 1.2
+
+# ══════════════════════════════════════════════════════════
 # FEATURE 5: Live simulation indicator
 # ══════════════════════════════════════════════════════════
 is_live = data.get("simulation_live", False)
