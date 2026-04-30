@@ -1,14 +1,14 @@
 {
   "mode": "adaptive",
-  "simulation_steps": 2900,
-  "wall_clock_seconds": 206.8,
-  "total_vehicles": 1944,
-  "total_delay": 118864,
-  "avg_delay_per_vehicle": 61.14,
-  "baseline_idle_time": 166409,
-  "ai_idle_time": 118864,
-  "idle_time_saved": 47545,
-  "saved_co2_kg": 24.25,
+  "simulation_steps": 500,
+  "wall_clock_seconds": 37.6,
+  "total_vehicles": 169,
+  "total_delay": 30332,
+  "avg_delay_per_vehicle": 179.48,
+  "baseline_idle_time": 42464,
+  "ai_idle_time": 30332,
+  "idle_time_saved": 12132,
+  "saved_co2_kg": 6.19,
   "emission_factor": 0.00051,
   "traffic_lights_count": 16,
   "corridors": [],
@@ -155,1901 +155,216 @@
     },
     {
       "step": 210,
-      "active_vehicles": 61,
+      "active_vehicles": 62,
       "idle_vehicles": 57,
-      "total_delay": 7178,
-      "efficiency": 6.56
+      "total_delay": 7181,
+      "efficiency": 8.06
     },
     {
       "step": 220,
-      "active_vehicles": 63,
+      "active_vehicles": 64,
       "idle_vehicles": 59,
-      "total_delay": 7761,
-      "efficiency": 6.35
+      "total_delay": 7765,
+      "efficiency": 7.81
     },
     {
       "step": 230,
-      "active_vehicles": 64,
+      "active_vehicles": 65,
       "idle_vehicles": 60,
-      "total_delay": 8363,
-      "efficiency": 6.25
+      "total_delay": 8367,
+      "efficiency": 7.69
     },
     {
       "step": 240,
       "active_vehicles": 69,
       "idle_vehicles": 61,
-      "total_delay": 8978,
+      "total_delay": 8982,
       "efficiency": 11.59
     },
     {
       "step": 250,
       "active_vehicles": 73,
       "idle_vehicles": 62,
-      "total_delay": 9594,
+      "total_delay": 9598,
       "efficiency": 15.07
     },
     {
       "step": 260,
       "active_vehicles": 74,
       "idle_vehicles": 67,
-      "total_delay": 10244,
+      "total_delay": 10247,
       "efficiency": 9.46
     },
     {
       "step": 270,
       "active_vehicles": 75,
       "idle_vehicles": 72,
-      "total_delay": 10951,
+      "total_delay": 10954,
       "efficiency": 4.0
     },
     {
       "step": 280,
       "active_vehicles": 77,
       "idle_vehicles": 75,
-      "total_delay": 11689,
+      "total_delay": 11693,
       "efficiency": 2.6
     },
     {
       "step": 290,
       "active_vehicles": 79,
       "idle_vehicles": 75,
-      "total_delay": 12441,
+      "total_delay": 12445,
       "efficiency": 5.06
     },
     {
       "step": 300,
-      "active_vehicles": 82,
+      "active_vehicles": 83,
       "idle_vehicles": 76,
-      "total_delay": 13195,
-      "efficiency": 7.32
+      "total_delay": 13199,
+      "efficiency": 8.43
     },
     {
       "step": 310,
       "active_vehicles": 81,
       "idle_vehicles": 76,
-      "total_delay": 13955,
+      "total_delay": 13957,
       "efficiency": 6.17
     },
     {
       "step": 320,
-      "active_vehicles": 80,
+      "active_vehicles": 81,
       "idle_vehicles": 71,
-      "total_delay": 14705,
-      "efficiency": 11.25
+      "total_delay": 14707,
+      "efficiency": 12.35
     },
     {
       "step": 330,
       "active_vehicles": 83,
       "idle_vehicles": 59,
-      "total_delay": 15351,
+      "total_delay": 15352,
       "efficiency": 28.92
     },
     {
       "step": 340,
-      "active_vehicles": 84,
-      "idle_vehicles": 55,
-      "total_delay": 15884,
-      "efficiency": 34.52
+      "active_vehicles": 81,
+      "idle_vehicles": 54,
+      "total_delay": 15888,
+      "efficiency": 33.33
     },
     {
       "step": 350,
-      "active_vehicles": 85,
-      "idle_vehicles": 62,
-      "total_delay": 16456,
-      "efficiency": 27.06
+      "active_vehicles": 83,
+      "idle_vehicles": 60,
+      "total_delay": 16441,
+      "efficiency": 27.71
     },
     {
       "step": 360,
-      "active_vehicles": 87,
-      "idle_vehicles": 79,
-      "total_delay": 17164,
-      "efficiency": 9.2
+      "active_vehicles": 84,
+      "idle_vehicles": 77,
+      "total_delay": 17134,
+      "efficiency": 8.33
     },
     {
       "step": 370,
-      "active_vehicles": 89,
-      "idle_vehicles": 88,
-      "total_delay": 17996,
-      "efficiency": 1.12
+      "active_vehicles": 87,
+      "idle_vehicles": 86,
+      "total_delay": 17947,
+      "efficiency": 1.15
     },
     {
       "step": 380,
-      "active_vehicles": 94,
-      "idle_vehicles": 89,
-      "total_delay": 18874,
-      "efficiency": 5.32
+      "active_vehicles": 92,
+      "idle_vehicles": 87,
+      "total_delay": 18806,
+      "efficiency": 5.43
     },
     {
       "step": 390,
-      "active_vehicles": 94,
-      "idle_vehicles": 91,
-      "total_delay": 19780,
-      "efficiency": 3.19
+      "active_vehicles": 92,
+      "idle_vehicles": 89,
+      "total_delay": 19692,
+      "efficiency": 3.26
     },
     {
       "step": 400,
-      "active_vehicles": 93,
-      "idle_vehicles": 91,
-      "total_delay": 20699,
-      "efficiency": 2.15
+      "active_vehicles": 91,
+      "idle_vehicles": 89,
+      "total_delay": 20591,
+      "efficiency": 2.2
     },
     {
       "step": 410,
-      "active_vehicles": 94,
-      "idle_vehicles": 91,
-      "total_delay": 21609,
-      "efficiency": 3.19
+      "active_vehicles": 92,
+      "idle_vehicles": 89,
+      "total_delay": 21482,
+      "efficiency": 3.26
     },
     {
       "step": 420,
-      "active_vehicles": 99,
-      "idle_vehicles": 95,
-      "total_delay": 22535,
-      "efficiency": 4.04
+      "active_vehicles": 97,
+      "idle_vehicles": 93,
+      "total_delay": 22390,
+      "efficiency": 4.12
     },
     {
       "step": 430,
-      "active_vehicles": 100,
-      "idle_vehicles": 94,
-      "total_delay": 23476,
-      "efficiency": 6.0
+      "active_vehicles": 98,
+      "idle_vehicles": 92,
+      "total_delay": 23311,
+      "efficiency": 6.12
     },
     {
       "step": 440,
-      "active_vehicles": 102,
-      "idle_vehicles": 98,
-      "total_delay": 24437,
-      "efficiency": 3.92
+      "active_vehicles": 100,
+      "idle_vehicles": 95,
+      "total_delay": 24253,
+      "efficiency": 5.0
     },
     {
       "step": 450,
-      "active_vehicles": 103,
-      "idle_vehicles": 99,
-      "total_delay": 25419,
-      "efficiency": 3.88
+      "active_vehicles": 101,
+      "idle_vehicles": 97,
+      "total_delay": 25214,
+      "efficiency": 3.96
     },
     {
       "step": 460,
-      "active_vehicles": 106,
-      "idle_vehicles": 101,
-      "total_delay": 26423,
-      "efficiency": 4.72
+      "active_vehicles": 104,
+      "idle_vehicles": 99,
+      "total_delay": 26198,
+      "efficiency": 4.81
     },
     {
       "step": 470,
-      "active_vehicles": 112,
-      "idle_vehicles": 104,
-      "total_delay": 27442,
-      "efficiency": 7.14
+      "active_vehicles": 110,
+      "idle_vehicles": 102,
+      "total_delay": 27197,
+      "efficiency": 7.27
     },
     {
       "step": 480,
-      "active_vehicles": 114,
-      "idle_vehicles": 104,
-      "total_delay": 28481,
-      "efficiency": 8.77
+      "active_vehicles": 112,
+      "idle_vehicles": 102,
+      "total_delay": 28216,
+      "efficiency": 8.93
     },
     {
       "step": 490,
-      "active_vehicles": 112,
-      "idle_vehicles": 108,
-      "total_delay": 29548,
-      "efficiency": 3.57
+      "active_vehicles": 110,
+      "idle_vehicles": 106,
+      "total_delay": 29262,
+      "efficiency": 3.64
     },
     {
       "step": 500,
-      "active_vehicles": 115,
-      "idle_vehicles": 110,
-      "total_delay": 30638,
-      "efficiency": 4.35
-    },
-    {
-      "step": 510,
-      "active_vehicles": 117,
-      "idle_vehicles": 114,
-      "total_delay": 31752,
-      "efficiency": 2.56
-    },
-    {
-      "step": 520,
-      "active_vehicles": 118,
-      "idle_vehicles": 115,
-      "total_delay": 32890,
-      "efficiency": 2.54
-    },
-    {
-      "step": 530,
-      "active_vehicles": 121,
-      "idle_vehicles": 117,
-      "total_delay": 34053,
-      "efficiency": 3.31
-    },
-    {
-      "step": 540,
-      "active_vehicles": 123,
-      "idle_vehicles": 119,
-      "total_delay": 35234,
-      "efficiency": 3.25
-    },
-    {
-      "step": 550,
-      "active_vehicles": 124,
-      "idle_vehicles": 120,
-      "total_delay": 36435,
-      "efficiency": 3.23
-    },
-    {
-      "step": 560,
-      "active_vehicles": 126,
-      "idle_vehicles": 122,
-      "total_delay": 37644,
-      "efficiency": 3.17
-    },
-    {
-      "step": 570,
-      "active_vehicles": 127,
-      "idle_vehicles": 122,
-      "total_delay": 38865,
-      "efficiency": 3.94
-    },
-    {
-      "step": 580,
-      "active_vehicles": 130,
-      "idle_vehicles": 126,
-      "total_delay": 40123,
-      "efficiency": 3.08
-    },
-    {
-      "step": 590,
-      "active_vehicles": 134,
-      "idle_vehicles": 129,
-      "total_delay": 41398,
-      "efficiency": 3.73
-    },
-    {
-      "step": 600,
-      "active_vehicles": 135,
-      "idle_vehicles": 132,
-      "total_delay": 42709,
-      "efficiency": 2.22
-    },
-    {
-      "step": 610,
-      "active_vehicles": 136,
-      "idle_vehicles": 132,
-      "total_delay": 44031,
-      "efficiency": 2.94
-    },
-    {
-      "step": 620,
-      "active_vehicles": 137,
-      "idle_vehicles": 131,
-      "total_delay": 45360,
-      "efficiency": 4.38
-    },
-    {
-      "step": 630,
-      "active_vehicles": 139,
-      "idle_vehicles": 125,
-      "total_delay": 46640,
-      "efficiency": 10.07
-    },
-    {
-      "step": 640,
-      "active_vehicles": 143,
-      "idle_vehicles": 110,
-      "total_delay": 47815,
-      "efficiency": 23.08
-    },
-    {
-      "step": 650,
-      "active_vehicles": 141,
-      "idle_vehicles": 107,
-      "total_delay": 48878,
-      "efficiency": 24.11
-    },
-    {
-      "step": 660,
-      "active_vehicles": 145,
-      "idle_vehicles": 113,
-      "total_delay": 49978,
-      "efficiency": 22.07
-    },
-    {
-      "step": 670,
-      "active_vehicles": 148,
-      "idle_vehicles": 120,
-      "total_delay": 51160,
-      "efficiency": 18.92
-    },
-    {
-      "step": 680,
-      "active_vehicles": 150,
-      "idle_vehicles": 120,
-      "total_delay": 52365,
-      "efficiency": 20.0
-    },
-    {
-      "step": 690,
-      "active_vehicles": 150,
-      "idle_vehicles": 136,
-      "total_delay": 53665,
-      "efficiency": 9.33
-    },
-    {
-      "step": 700,
-      "active_vehicles": 151,
-      "idle_vehicles": 148,
-      "total_delay": 55103,
-      "efficiency": 1.99
-    },
-    {
-      "step": 710,
-      "active_vehicles": 154,
-      "idle_vehicles": 148,
-      "total_delay": 56588,
-      "efficiency": 3.9
-    },
-    {
-      "step": 720,
-      "active_vehicles": 157,
-      "idle_vehicles": 152,
-      "total_delay": 58084,
-      "efficiency": 3.18
-    },
-    {
-      "step": 730,
-      "active_vehicles": 157,
-      "idle_vehicles": 155,
-      "total_delay": 59629,
-      "efficiency": 1.27
-    },
-    {
-      "step": 740,
-      "active_vehicles": 158,
-      "idle_vehicles": 156,
-      "total_delay": 61186,
-      "efficiency": 1.27
-    },
-    {
-      "step": 750,
-      "active_vehicles": 162,
-      "idle_vehicles": 160,
-      "total_delay": 62761,
-      "efficiency": 1.23
-    },
-    {
-      "step": 760,
-      "active_vehicles": 164,
-      "idle_vehicles": 162,
-      "total_delay": 64368,
-      "efficiency": 1.22
-    },
-    {
-      "step": 770,
-      "active_vehicles": 164,
-      "idle_vehicles": 163,
-      "total_delay": 65996,
-      "efficiency": 0.61
-    },
-    {
-      "step": 780,
-      "active_vehicles": 164,
-      "idle_vehicles": 163,
-      "total_delay": 67626,
-      "efficiency": 0.61
-    },
-    {
-      "step": 790,
-      "active_vehicles": 165,
-      "idle_vehicles": 163,
-      "total_delay": 69258,
-      "efficiency": 1.21
-    },
-    {
-      "step": 800,
-      "active_vehicles": 166,
-      "idle_vehicles": 165,
-      "total_delay": 70892,
-      "efficiency": 0.6
-    },
-    {
-      "step": 810,
-      "active_vehicles": 166,
-      "idle_vehicles": 165,
-      "total_delay": 72534,
-      "efficiency": 0.6
-    },
-    {
-      "step": 820,
-      "active_vehicles": 167,
-      "idle_vehicles": 165,
-      "total_delay": 74186,
-      "efficiency": 1.2
-    },
-    {
-      "step": 830,
-      "active_vehicles": 168,
-      "idle_vehicles": 166,
-      "total_delay": 75841,
-      "efficiency": 1.19
-    },
-    {
-      "step": 840,
-      "active_vehicles": 167,
-      "idle_vehicles": 166,
-      "total_delay": 77501,
-      "efficiency": 0.6
-    },
-    {
-      "step": 850,
-      "active_vehicles": 167,
-      "idle_vehicles": 166,
-      "total_delay": 79161,
-      "efficiency": 0.6
-    },
-    {
-      "step": 860,
-      "active_vehicles": 168,
-      "idle_vehicles": 167,
-      "total_delay": 80824,
-      "efficiency": 0.6
-    },
-    {
-      "step": 870,
-      "active_vehicles": 169,
-      "idle_vehicles": 167,
-      "total_delay": 82495,
-      "efficiency": 1.18
-    },
-    {
-      "step": 880,
-      "active_vehicles": 169,
-      "idle_vehicles": 167,
-      "total_delay": 84165,
-      "efficiency": 1.18
-    },
-    {
-      "step": 890,
-      "active_vehicles": 170,
-      "idle_vehicles": 167,
-      "total_delay": 85837,
-      "efficiency": 1.76
-    },
-    {
-      "step": 900,
-      "active_vehicles": 171,
-      "idle_vehicles": 168,
-      "total_delay": 87512,
-      "efficiency": 1.75
-    },
-    {
-      "step": 910,
-      "active_vehicles": 173,
-      "idle_vehicles": 169,
-      "total_delay": 89199,
-      "efficiency": 2.31
-    },
-    {
-      "step": 920,
-      "active_vehicles": 173,
-      "idle_vehicles": 169,
-      "total_delay": 90889,
-      "efficiency": 2.31
-    },
-    {
-      "step": 930,
-      "active_vehicles": 171,
-      "idle_vehicles": 161,
-      "total_delay": 92551,
-      "efficiency": 5.85
-    },
-    {
-      "step": 940,
-      "active_vehicles": 170,
-      "idle_vehicles": 150,
-      "total_delay": 94103,
-      "efficiency": 11.76
-    },
-    {
-      "step": 950,
-      "active_vehicles": 170,
-      "idle_vehicles": 132,
-      "total_delay": 95486,
-      "efficiency": 22.35
-    },
-    {
-      "step": 960,
-      "active_vehicles": 165,
-      "idle_vehicles": 88,
-      "total_delay": 96478,
-      "efficiency": 46.67
-    },
-    {
-      "step": 970,
-      "active_vehicles": 160,
-      "idle_vehicles": 66,
-      "total_delay": 97238,
-      "efficiency": 58.75
-    },
-    {
-      "step": 980,
-      "active_vehicles": 159,
-      "idle_vehicles": 51,
-      "total_delay": 97825,
-      "efficiency": 67.92
-    },
-    {
-      "step": 990,
-      "active_vehicles": 149,
-      "idle_vehicles": 40,
-      "total_delay": 98261,
-      "efficiency": 73.15
-    },
-    {
-      "step": 1000,
-      "active_vehicles": 140,
-      "idle_vehicles": 40,
-      "total_delay": 98635,
-      "efficiency": 71.43
-    },
-    {
-      "step": 1010,
-      "active_vehicles": 141,
-      "idle_vehicles": 43,
-      "total_delay": 99031,
-      "efficiency": 69.5
-    },
-    {
-      "step": 1020,
-      "active_vehicles": 142,
-      "idle_vehicles": 48,
-      "total_delay": 99516,
-      "efficiency": 66.2
-    },
-    {
-      "step": 1030,
-      "active_vehicles": 139,
-      "idle_vehicles": 49,
-      "total_delay": 99998,
-      "efficiency": 64.75
-    },
-    {
-      "step": 1040,
-      "active_vehicles": 139,
-      "idle_vehicles": 54,
-      "total_delay": 100508,
-      "efficiency": 61.15
-    },
-    {
-      "step": 1050,
-      "active_vehicles": 136,
-      "idle_vehicles": 56,
-      "total_delay": 101055,
-      "efficiency": 58.82
-    },
-    {
-      "step": 1060,
-      "active_vehicles": 141,
-      "idle_vehicles": 69,
-      "total_delay": 101668,
-      "efficiency": 51.06
-    },
-    {
-      "step": 1070,
-      "active_vehicles": 135,
-      "idle_vehicles": 61,
-      "total_delay": 102315,
-      "efficiency": 54.81
-    },
-    {
-      "step": 1080,
-      "active_vehicles": 125,
-      "idle_vehicles": 53,
-      "total_delay": 102878,
-      "efficiency": 57.6
-    },
-    {
-      "step": 1090,
-      "active_vehicles": 118,
-      "idle_vehicles": 48,
-      "total_delay": 103383,
-      "efficiency": 59.32
-    },
-    {
-      "step": 1100,
-      "active_vehicles": 117,
-      "idle_vehicles": 50,
-      "total_delay": 103882,
-      "efficiency": 57.26
-    },
-    {
-      "step": 1110,
-      "active_vehicles": 119,
-      "idle_vehicles": 31,
-      "total_delay": 104240,
-      "efficiency": 73.95
-    },
-    {
-      "step": 1120,
-      "active_vehicles": 119,
-      "idle_vehicles": 34,
-      "total_delay": 104545,
-      "efficiency": 71.43
-    },
-    {
-      "step": 1130,
-      "active_vehicles": 118,
-      "idle_vehicles": 30,
-      "total_delay": 104861,
-      "efficiency": 74.58
-    },
-    {
-      "step": 1140,
-      "active_vehicles": 112,
-      "idle_vehicles": 21,
-      "total_delay": 105104,
-      "efficiency": 81.25
-    },
-    {
-      "step": 1150,
-      "active_vehicles": 110,
-      "idle_vehicles": 23,
-      "total_delay": 105347,
-      "efficiency": 79.09
-    },
-    {
-      "step": 1160,
-      "active_vehicles": 102,
-      "idle_vehicles": 18,
-      "total_delay": 105534,
-      "efficiency": 82.35
-    },
-    {
-      "step": 1170,
-      "active_vehicles": 94,
-      "idle_vehicles": 10,
-      "total_delay": 105689,
-      "efficiency": 89.36
-    },
-    {
-      "step": 1180,
-      "active_vehicles": 94,
-      "idle_vehicles": 16,
-      "total_delay": 105799,
-      "efficiency": 82.98
-    },
-    {
-      "step": 1190,
-      "active_vehicles": 91,
-      "idle_vehicles": 23,
-      "total_delay": 105984,
-      "efficiency": 74.73
-    },
-    {
-      "step": 1200,
-      "active_vehicles": 90,
-      "idle_vehicles": 30,
-      "total_delay": 106244,
-      "efficiency": 66.67
-    },
-    {
-      "step": 1210,
-      "active_vehicles": 87,
-      "idle_vehicles": 35,
-      "total_delay": 106589,
-      "efficiency": 59.77
-    },
-    {
-      "step": 1220,
-      "active_vehicles": 79,
-      "idle_vehicles": 29,
-      "total_delay": 106915,
-      "efficiency": 63.29
-    },
-    {
-      "step": 1230,
-      "active_vehicles": 76,
-      "idle_vehicles": 28,
-      "total_delay": 107213,
-      "efficiency": 63.16
-    },
-    {
-      "step": 1240,
-      "active_vehicles": 84,
-      "idle_vehicles": 38,
-      "total_delay": 107536,
-      "efficiency": 54.76
-    },
-    {
-      "step": 1250,
-      "active_vehicles": 81,
-      "idle_vehicles": 42,
-      "total_delay": 107916,
-      "efficiency": 48.15
-    },
-    {
-      "step": 1260,
-      "active_vehicles": 81,
-      "idle_vehicles": 53,
-      "total_delay": 108386,
-      "efficiency": 34.57
-    },
-    {
-      "step": 1270,
-      "active_vehicles": 81,
-      "idle_vehicles": 51,
-      "total_delay": 108911,
-      "efficiency": 37.04
-    },
-    {
-      "step": 1280,
-      "active_vehicles": 79,
-      "idle_vehicles": 48,
-      "total_delay": 109389,
-      "efficiency": 39.24
-    },
-    {
-      "step": 1290,
-      "active_vehicles": 76,
-      "idle_vehicles": 32,
-      "total_delay": 109792,
-      "efficiency": 57.89
-    },
-    {
-      "step": 1300,
-      "active_vehicles": 72,
-      "idle_vehicles": 25,
-      "total_delay": 110095,
-      "efficiency": 65.28
-    },
-    {
-      "step": 1310,
-      "active_vehicles": 78,
-      "idle_vehicles": 16,
-      "total_delay": 110294,
-      "efficiency": 79.49
-    },
-    {
-      "step": 1320,
-      "active_vehicles": 74,
-      "idle_vehicles": 17,
-      "total_delay": 110444,
-      "efficiency": 77.03
-    },
-    {
-      "step": 1330,
-      "active_vehicles": 72,
-      "idle_vehicles": 15,
-      "total_delay": 110579,
-      "efficiency": 79.17
-    },
-    {
-      "step": 1340,
-      "active_vehicles": 61,
-      "idle_vehicles": 1,
-      "total_delay": 110626,
-      "efficiency": 98.36
-    },
-    {
-      "step": 1350,
-      "active_vehicles": 63,
-      "idle_vehicles": 10,
-      "total_delay": 110693,
-      "efficiency": 84.13
-    },
-    {
-      "step": 1360,
-      "active_vehicles": 61,
-      "idle_vehicles": 7,
-      "total_delay": 110764,
-      "efficiency": 88.52
-    },
-    {
-      "step": 1370,
-      "active_vehicles": 57,
-      "idle_vehicles": 4,
-      "total_delay": 110829,
-      "efficiency": 92.98
-    },
-    {
-      "step": 1380,
-      "active_vehicles": 53,
-      "idle_vehicles": 10,
-      "total_delay": 110903,
-      "efficiency": 81.13
-    },
-    {
-      "step": 1390,
-      "active_vehicles": 58,
-      "idle_vehicles": 20,
-      "total_delay": 111052,
-      "efficiency": 65.52
-    },
-    {
-      "step": 1400,
-      "active_vehicles": 59,
-      "idle_vehicles": 28,
-      "total_delay": 111312,
-      "efficiency": 52.54
-    },
-    {
-      "step": 1410,
-      "active_vehicles": 55,
-      "idle_vehicles": 20,
-      "total_delay": 111553,
-      "efficiency": 63.64
-    },
-    {
-      "step": 1420,
-      "active_vehicles": 55,
-      "idle_vehicles": 11,
-      "total_delay": 111717,
-      "efficiency": 80.0
-    },
-    {
-      "step": 1430,
-      "active_vehicles": 51,
-      "idle_vehicles": 6,
-      "total_delay": 111783,
-      "efficiency": 88.24
-    },
-    {
-      "step": 1440,
-      "active_vehicles": 40,
-      "idle_vehicles": 6,
-      "total_delay": 111821,
-      "efficiency": 85.0
-    },
-    {
-      "step": 1450,
-      "active_vehicles": 41,
-      "idle_vehicles": 18,
-      "total_delay": 111931,
-      "efficiency": 56.1
-    },
-    {
-      "step": 1460,
-      "active_vehicles": 45,
-      "idle_vehicles": 17,
-      "total_delay": 112115,
-      "efficiency": 62.22
-    },
-    {
-      "step": 1470,
-      "active_vehicles": 45,
-      "idle_vehicles": 11,
-      "total_delay": 112231,
-      "efficiency": 75.56
-    },
-    {
-      "step": 1480,
-      "active_vehicles": 39,
-      "idle_vehicles": 25,
-      "total_delay": 112397,
-      "efficiency": 35.9
-    },
-    {
-      "step": 1490,
-      "active_vehicles": 45,
-      "idle_vehicles": 25,
-      "total_delay": 112664,
-      "efficiency": 44.44
-    },
-    {
-      "step": 1500,
-      "active_vehicles": 40,
-      "idle_vehicles": 14,
-      "total_delay": 112847,
-      "efficiency": 65.0
-    },
-    {
-      "step": 1510,
-      "active_vehicles": 39,
-      "idle_vehicles": 12,
-      "total_delay": 112962,
-      "efficiency": 69.23
-    },
-    {
-      "step": 1520,
-      "active_vehicles": 35,
-      "idle_vehicles": 12,
-      "total_delay": 113093,
-      "efficiency": 65.71
-    },
-    {
-      "step": 1530,
-      "active_vehicles": 32,
-      "idle_vehicles": 5,
-      "total_delay": 113162,
-      "efficiency": 84.38
-    },
-    {
-      "step": 1540,
-      "active_vehicles": 32,
-      "idle_vehicles": 13,
-      "total_delay": 113272,
-      "efficiency": 59.38
-    },
-    {
-      "step": 1550,
-      "active_vehicles": 37,
-      "idle_vehicles": 5,
-      "total_delay": 113359,
-      "efficiency": 86.49
-    },
-    {
-      "step": 1560,
-      "active_vehicles": 33,
-      "idle_vehicles": 4,
-      "total_delay": 113385,
-      "efficiency": 87.88
-    },
-    {
-      "step": 1570,
-      "active_vehicles": 31,
-      "idle_vehicles": 7,
-      "total_delay": 113457,
-      "efficiency": 77.42
-    },
-    {
-      "step": 1580,
-      "active_vehicles": 29,
-      "idle_vehicles": 6,
-      "total_delay": 113516,
-      "efficiency": 79.31
-    },
-    {
-      "step": 1590,
-      "active_vehicles": 27,
-      "idle_vehicles": 11,
-      "total_delay": 113599,
-      "efficiency": 59.26
-    },
-    {
-      "step": 1600,
-      "active_vehicles": 25,
-      "idle_vehicles": 15,
-      "total_delay": 113705,
-      "efficiency": 40.0
-    },
-    {
-      "step": 1610,
-      "active_vehicles": 26,
-      "idle_vehicles": 12,
-      "total_delay": 113852,
-      "efficiency": 53.85
-    },
-    {
-      "step": 1620,
-      "active_vehicles": 28,
-      "idle_vehicles": 12,
-      "total_delay": 113965,
-      "efficiency": 57.14
-    },
-    {
-      "step": 1630,
-      "active_vehicles": 28,
-      "idle_vehicles": 9,
-      "total_delay": 114053,
-      "efficiency": 67.86
-    },
-    {
-      "step": 1640,
-      "active_vehicles": 26,
-      "idle_vehicles": 12,
-      "total_delay": 114146,
-      "efficiency": 53.85
-    },
-    {
-      "step": 1650,
-      "active_vehicles": 31,
-      "idle_vehicles": 14,
-      "total_delay": 114274,
-      "efficiency": 54.84
-    },
-    {
-      "step": 1660,
-      "active_vehicles": 26,
-      "idle_vehicles": 9,
-      "total_delay": 114375,
-      "efficiency": 65.38
-    },
-    {
-      "step": 1670,
-      "active_vehicles": 24,
-      "idle_vehicles": 4,
-      "total_delay": 114414,
-      "efficiency": 83.33
-    },
-    {
-      "step": 1680,
-      "active_vehicles": 30,
-      "idle_vehicles": 10,
-      "total_delay": 114484,
-      "efficiency": 66.67
-    },
-    {
-      "step": 1690,
-      "active_vehicles": 27,
-      "idle_vehicles": 16,
-      "total_delay": 114616,
-      "efficiency": 40.74
-    },
-    {
-      "step": 1700,
-      "active_vehicles": 28,
-      "idle_vehicles": 14,
-      "total_delay": 114779,
-      "efficiency": 50.0
-    },
-    {
-      "step": 1710,
-      "active_vehicles": 29,
-      "idle_vehicles": 12,
-      "total_delay": 114876,
-      "efficiency": 58.62
-    },
-    {
-      "step": 1720,
-      "active_vehicles": 29,
-      "idle_vehicles": 8,
-      "total_delay": 114977,
-      "efficiency": 72.41
-    },
-    {
-      "step": 1730,
-      "active_vehicles": 29,
-      "idle_vehicles": 1,
-      "total_delay": 115011,
-      "efficiency": 96.55
-    },
-    {
-      "step": 1740,
-      "active_vehicles": 26,
-      "idle_vehicles": 4,
-      "total_delay": 115047,
-      "efficiency": 84.62
-    },
-    {
-      "step": 1750,
-      "active_vehicles": 27,
-      "idle_vehicles": 4,
-      "total_delay": 115097,
-      "efficiency": 85.19
-    },
-    {
-      "step": 1760,
-      "active_vehicles": 24,
-      "idle_vehicles": 9,
-      "total_delay": 115150,
-      "efficiency": 62.5
-    },
-    {
-      "step": 1770,
-      "active_vehicles": 23,
-      "idle_vehicles": 4,
-      "total_delay": 115244,
-      "efficiency": 82.61
-    },
-    {
-      "step": 1780,
-      "active_vehicles": 25,
-      "idle_vehicles": 6,
-      "total_delay": 115267,
-      "efficiency": 76.0
-    },
-    {
-      "step": 1790,
-      "active_vehicles": 22,
-      "idle_vehicles": 7,
-      "total_delay": 115346,
-      "efficiency": 68.18
-    },
-    {
-      "step": 1800,
-      "active_vehicles": 21,
-      "idle_vehicles": 7,
-      "total_delay": 115412,
-      "efficiency": 66.67
-    },
-    {
-      "step": 1810,
-      "active_vehicles": 21,
-      "idle_vehicles": 6,
-      "total_delay": 115454,
-      "efficiency": 71.43
-    },
-    {
-      "step": 1820,
-      "active_vehicles": 27,
-      "idle_vehicles": 10,
-      "total_delay": 115546,
-      "efficiency": 62.96
-    },
-    {
-      "step": 1830,
-      "active_vehicles": 31,
-      "idle_vehicles": 1,
-      "total_delay": 115607,
-      "efficiency": 96.77
-    },
-    {
-      "step": 1840,
-      "active_vehicles": 33,
-      "idle_vehicles": 11,
-      "total_delay": 115688,
-      "efficiency": 66.67
-    },
-    {
-      "step": 1850,
-      "active_vehicles": 31,
-      "idle_vehicles": 9,
-      "total_delay": 115803,
-      "efficiency": 70.97
-    },
-    {
-      "step": 1860,
-      "active_vehicles": 29,
-      "idle_vehicles": 13,
-      "total_delay": 115932,
-      "efficiency": 55.17
-    },
-    {
-      "step": 1870,
-      "active_vehicles": 33,
-      "idle_vehicles": 8,
-      "total_delay": 116027,
-      "efficiency": 75.76
-    },
-    {
-      "step": 1880,
-      "active_vehicles": 31,
-      "idle_vehicles": 8,
-      "total_delay": 116076,
-      "efficiency": 74.19
-    },
-    {
-      "step": 1890,
-      "active_vehicles": 31,
-      "idle_vehicles": 19,
-      "total_delay": 116231,
-      "efficiency": 38.71
-    },
-    {
-      "step": 1900,
-      "active_vehicles": 30,
-      "idle_vehicles": 10,
-      "total_delay": 116349,
-      "efficiency": 66.67
-    },
-    {
-      "step": 1910,
-      "active_vehicles": 27,
-      "idle_vehicles": 12,
-      "total_delay": 116456,
-      "efficiency": 55.56
-    },
-    {
-      "step": 1920,
-      "active_vehicles": 28,
-      "idle_vehicles": 12,
-      "total_delay": 116588,
-      "efficiency": 57.14
-    },
-    {
-      "step": 1930,
-      "active_vehicles": 34,
-      "idle_vehicles": 6,
-      "total_delay": 116675,
-      "efficiency": 82.35
-    },
-    {
-      "step": 1940,
-      "active_vehicles": 28,
-      "idle_vehicles": 9,
-      "total_delay": 116752,
-      "efficiency": 67.86
-    },
-    {
-      "step": 1950,
-      "active_vehicles": 25,
-      "idle_vehicles": 11,
-      "total_delay": 116849,
-      "efficiency": 56.0
-    },
-    {
-      "step": 1960,
-      "active_vehicles": 27,
-      "idle_vehicles": 5,
-      "total_delay": 116934,
-      "efficiency": 81.48
-    },
-    {
-      "step": 1970,
-      "active_vehicles": 28,
-      "idle_vehicles": 10,
-      "total_delay": 117002,
-      "efficiency": 64.29
-    },
-    {
-      "step": 1980,
-      "active_vehicles": 26,
-      "idle_vehicles": 5,
-      "total_delay": 117084,
-      "efficiency": 80.77
-    },
-    {
-      "step": 1990,
-      "active_vehicles": 27,
-      "idle_vehicles": 11,
-      "total_delay": 117166,
-      "efficiency": 59.26
-    },
-    {
-      "step": 2000,
-      "active_vehicles": 27,
-      "idle_vehicles": 12,
-      "total_delay": 117290,
-      "efficiency": 55.56
-    },
-    {
-      "step": 2010,
-      "active_vehicles": 23,
-      "idle_vehicles": 1,
-      "total_delay": 117331,
-      "efficiency": 95.65
-    },
-    {
-      "step": 2020,
-      "active_vehicles": 18,
-      "idle_vehicles": 4,
-      "total_delay": 117361,
-      "efficiency": 77.78
-    },
-    {
-      "step": 2030,
-      "active_vehicles": 15,
-      "idle_vehicles": 1,
-      "total_delay": 117389,
-      "efficiency": 93.33
-    },
-    {
-      "step": 2040,
-      "active_vehicles": 16,
-      "idle_vehicles": 2,
-      "total_delay": 117404,
-      "efficiency": 87.5
-    },
-    {
-      "step": 2050,
-      "active_vehicles": 16,
-      "idle_vehicles": 1,
-      "total_delay": 117422,
-      "efficiency": 93.75
-    },
-    {
-      "step": 2060,
-      "active_vehicles": 15,
-      "idle_vehicles": 3,
-      "total_delay": 117458,
-      "efficiency": 80.0
-    },
-    {
-      "step": 2070,
-      "active_vehicles": 15,
-      "idle_vehicles": 5,
-      "total_delay": 117497,
-      "efficiency": 66.67
-    },
-    {
-      "step": 2080,
-      "active_vehicles": 17,
-      "idle_vehicles": 3,
-      "total_delay": 117528,
-      "efficiency": 82.35
-    },
-    {
-      "step": 2090,
-      "active_vehicles": 15,
-      "idle_vehicles": 1,
-      "total_delay": 117559,
-      "efficiency": 93.33
-    },
-    {
-      "step": 2100,
-      "active_vehicles": 14,
-      "idle_vehicles": 0,
-      "total_delay": 117570,
-      "efficiency": 100.0
-    },
-    {
-      "step": 2110,
-      "active_vehicles": 15,
-      "idle_vehicles": 3,
-      "total_delay": 117595,
-      "efficiency": 80.0
-    },
-    {
-      "step": 2120,
-      "active_vehicles": 13,
-      "idle_vehicles": 5,
-      "total_delay": 117635,
-      "efficiency": 61.54
-    },
-    {
-      "step": 2130,
-      "active_vehicles": 12,
-      "idle_vehicles": 2,
-      "total_delay": 117660,
-      "efficiency": 83.33
-    },
-    {
-      "step": 2140,
-      "active_vehicles": 13,
-      "idle_vehicles": 5,
-      "total_delay": 117697,
-      "efficiency": 61.54
-    },
-    {
-      "step": 2150,
-      "active_vehicles": 14,
-      "idle_vehicles": 3,
-      "total_delay": 117739,
-      "efficiency": 78.57
-    },
-    {
-      "step": 2160,
-      "active_vehicles": 13,
-      "idle_vehicles": 0,
-      "total_delay": 117755,
-      "efficiency": 100.0
-    },
-    {
-      "step": 2170,
-      "active_vehicles": 13,
-      "idle_vehicles": 2,
-      "total_delay": 117778,
-      "efficiency": 84.62
-    },
-    {
-      "step": 2180,
-      "active_vehicles": 15,
-      "idle_vehicles": 2,
-      "total_delay": 117792,
-      "efficiency": 86.67
-    },
-    {
-      "step": 2190,
-      "active_vehicles": 13,
-      "idle_vehicles": 0,
-      "total_delay": 117811,
-      "efficiency": 100.0
-    },
-    {
-      "step": 2200,
-      "active_vehicles": 11,
-      "idle_vehicles": 6,
-      "total_delay": 117851,
-      "efficiency": 45.45
-    },
-    {
-      "step": 2210,
-      "active_vehicles": 12,
-      "idle_vehicles": 1,
-      "total_delay": 117878,
-      "efficiency": 91.67
-    },
-    {
-      "step": 2220,
-      "active_vehicles": 14,
-      "idle_vehicles": 0,
-      "total_delay": 117897,
-      "efficiency": 100.0
-    },
-    {
-      "step": 2230,
-      "active_vehicles": 16,
-      "idle_vehicles": 8,
-      "total_delay": 117929,
-      "efficiency": 50.0
-    },
-    {
-      "step": 2240,
-      "active_vehicles": 14,
-      "idle_vehicles": 3,
-      "total_delay": 117971,
-      "efficiency": 78.57
-    },
-    {
-      "step": 2250,
-      "active_vehicles": 13,
-      "idle_vehicles": 0,
-      "total_delay": 117984,
-      "efficiency": 100.0
-    },
-    {
-      "step": 2260,
-      "active_vehicles": 12,
-      "idle_vehicles": 3,
-      "total_delay": 118003,
-      "efficiency": 75.0
-    },
-    {
-      "step": 2270,
-      "active_vehicles": 13,
-      "idle_vehicles": 2,
-      "total_delay": 118024,
-      "efficiency": 84.62
-    },
-    {
-      "step": 2280,
-      "active_vehicles": 16,
-      "idle_vehicles": 7,
-      "total_delay": 118056,
-      "efficiency": 56.25
-    },
-    {
-      "step": 2290,
-      "active_vehicles": 14,
-      "idle_vehicles": 1,
-      "total_delay": 118088,
-      "efficiency": 92.86
-    },
-    {
-      "step": 2300,
-      "active_vehicles": 17,
-      "idle_vehicles": 0,
-      "total_delay": 118107,
-      "efficiency": 100.0
-    },
-    {
-      "step": 2310,
-      "active_vehicles": 12,
-      "idle_vehicles": 1,
-      "total_delay": 118123,
-      "efficiency": 91.67
-    },
-    {
-      "step": 2320,
-      "active_vehicles": 12,
-      "idle_vehicles": 7,
-      "total_delay": 118154,
-      "efficiency": 41.67
-    },
-    {
-      "step": 2330,
-      "active_vehicles": 12,
-      "idle_vehicles": 0,
-      "total_delay": 118183,
-      "efficiency": 100.0
-    },
-    {
-      "step": 2340,
-      "active_vehicles": 14,
-      "idle_vehicles": 0,
-      "total_delay": 118193,
-      "efficiency": 100.0
-    },
-    {
-      "step": 2350,
-      "active_vehicles": 13,
-      "idle_vehicles": 2,
-      "total_delay": 118209,
-      "efficiency": 84.62
-    },
-    {
-      "step": 2360,
-      "active_vehicles": 15,
-      "idle_vehicles": 2,
-      "total_delay": 118221,
-      "efficiency": 86.67
-    },
-    {
-      "step": 2370,
-      "active_vehicles": 12,
-      "idle_vehicles": 0,
-      "total_delay": 118230,
-      "efficiency": 100.0
-    },
-    {
-      "step": 2380,
-      "active_vehicles": 14,
-      "idle_vehicles": 1,
-      "total_delay": 118243,
-      "efficiency": 92.86
-    },
-    {
-      "step": 2390,
-      "active_vehicles": 11,
-      "idle_vehicles": 4,
-      "total_delay": 118264,
-      "efficiency": 63.64
-    },
-    {
-      "step": 2400,
-      "active_vehicles": 9,
-      "idle_vehicles": 1,
-      "total_delay": 118291,
-      "efficiency": 88.89
-    },
-    {
-      "step": 2410,
-      "active_vehicles": 9,
-      "idle_vehicles": 2,
-      "total_delay": 118313,
-      "efficiency": 77.78
-    },
-    {
-      "step": 2420,
-      "active_vehicles": 10,
-      "idle_vehicles": 2,
-      "total_delay": 118331,
-      "efficiency": 80.0
-    },
-    {
-      "step": 2430,
-      "active_vehicles": 11,
-      "idle_vehicles": 1,
-      "total_delay": 118352,
-      "efficiency": 90.91
-    },
-    {
-      "step": 2440,
-      "active_vehicles": 9,
-      "idle_vehicles": 3,
-      "total_delay": 118371,
-      "efficiency": 66.67
-    },
-    {
-      "step": 2450,
-      "active_vehicles": 9,
-      "idle_vehicles": 3,
-      "total_delay": 118401,
-      "efficiency": 66.67
-    },
-    {
-      "step": 2460,
-      "active_vehicles": 9,
-      "idle_vehicles": 1,
-      "total_delay": 118413,
-      "efficiency": 88.89
-    },
-    {
-      "step": 2470,
-      "active_vehicles": 12,
-      "idle_vehicles": 1,
-      "total_delay": 118431,
-      "efficiency": 91.67
-    },
-    {
-      "step": 2480,
-      "active_vehicles": 12,
-      "idle_vehicles": 2,
-      "total_delay": 118445,
-      "efficiency": 83.33
-    },
-    {
-      "step": 2490,
-      "active_vehicles": 8,
-      "idle_vehicles": 2,
-      "total_delay": 118457,
-      "efficiency": 75.0
-    },
-    {
-      "step": 2500,
-      "active_vehicles": 10,
-      "idle_vehicles": 3,
-      "total_delay": 118476,
-      "efficiency": 70.0
-    },
-    {
-      "step": 2510,
-      "active_vehicles": 10,
-      "idle_vehicles": 3,
-      "total_delay": 118499,
-      "efficiency": 70.0
-    },
-    {
-      "step": 2520,
-      "active_vehicles": 9,
-      "idle_vehicles": 1,
-      "total_delay": 118525,
-      "efficiency": 88.89
-    },
-    {
-      "step": 2530,
-      "active_vehicles": 10,
-      "idle_vehicles": 2,
-      "total_delay": 118540,
-      "efficiency": 80.0
-    },
-    {
-      "step": 2540,
-      "active_vehicles": 8,
-      "idle_vehicles": 0,
-      "total_delay": 118553,
-      "efficiency": 100.0
-    },
-    {
-      "step": 2550,
-      "active_vehicles": 8,
-      "idle_vehicles": 0,
-      "total_delay": 118564,
-      "efficiency": 100.0
-    },
-    {
-      "step": 2560,
-      "active_vehicles": 11,
-      "idle_vehicles": 1,
-      "total_delay": 118573,
-      "efficiency": 90.91
-    },
-    {
-      "step": 2570,
-      "active_vehicles": 9,
-      "idle_vehicles": 2,
-      "total_delay": 118581,
-      "efficiency": 77.78
-    },
-    {
-      "step": 2580,
-      "active_vehicles": 5,
-      "idle_vehicles": 1,
-      "total_delay": 118592,
-      "efficiency": 80.0
-    },
-    {
-      "step": 2590,
-      "active_vehicles": 6,
-      "idle_vehicles": 1,
-      "total_delay": 118599,
-      "efficiency": 83.33
-    },
-    {
-      "step": 2600,
-      "active_vehicles": 7,
-      "idle_vehicles": 0,
-      "total_delay": 118606,
-      "efficiency": 100.0
-    },
-    {
-      "step": 2610,
-      "active_vehicles": 7,
-      "idle_vehicles": 0,
-      "total_delay": 118615,
-      "efficiency": 100.0
-    },
-    {
-      "step": 2620,
-      "active_vehicles": 8,
-      "idle_vehicles": 1,
-      "total_delay": 118625,
-      "efficiency": 87.5
-    },
-    {
-      "step": 2630,
-      "active_vehicles": 7,
-      "idle_vehicles": 0,
-      "total_delay": 118631,
-      "efficiency": 100.0
-    },
-    {
-      "step": 2640,
-      "active_vehicles": 8,
-      "idle_vehicles": 1,
-      "total_delay": 118639,
-      "efficiency": 87.5
-    },
-    {
-      "step": 2650,
-      "active_vehicles": 5,
-      "idle_vehicles": 2,
-      "total_delay": 118659,
-      "efficiency": 60.0
-    },
-    {
-      "step": 2660,
-      "active_vehicles": 8,
-      "idle_vehicles": 1,
-      "total_delay": 118673,
-      "efficiency": 87.5
-    },
-    {
-      "step": 2670,
-      "active_vehicles": 9,
-      "idle_vehicles": 1,
-      "total_delay": 118680,
-      "efficiency": 88.89
-    },
-    {
-      "step": 2680,
-      "active_vehicles": 9,
-      "idle_vehicles": 1,
-      "total_delay": 118688,
-      "efficiency": 88.89
-    },
-    {
-      "step": 2690,
-      "active_vehicles": 6,
-      "idle_vehicles": 1,
-      "total_delay": 118698,
-      "efficiency": 83.33
-    },
-    {
-      "step": 2700,
-      "active_vehicles": 8,
-      "idle_vehicles": 1,
-      "total_delay": 118706,
-      "efficiency": 87.5
-    },
-    {
-      "step": 2710,
-      "active_vehicles": 8,
-      "idle_vehicles": 1,
-      "total_delay": 118712,
-      "efficiency": 87.5
-    },
-    {
-      "step": 2720,
-      "active_vehicles": 8,
-      "idle_vehicles": 1,
-      "total_delay": 118718,
-      "efficiency": 87.5
-    },
-    {
-      "step": 2730,
-      "active_vehicles": 8,
-      "idle_vehicles": 1,
-      "total_delay": 118726,
-      "efficiency": 87.5
-    },
-    {
-      "step": 2740,
-      "active_vehicles": 7,
-      "idle_vehicles": 1,
-      "total_delay": 118737,
-      "efficiency": 85.71
-    },
-    {
-      "step": 2750,
-      "active_vehicles": 8,
-      "idle_vehicles": 1,
-      "total_delay": 118743,
-      "efficiency": 87.5
-    },
-    {
-      "step": 2760,
-      "active_vehicles": 9,
-      "idle_vehicles": 1,
-      "total_delay": 118749,
-      "efficiency": 88.89
-    },
-    {
-      "step": 2770,
-      "active_vehicles": 8,
-      "idle_vehicles": 0,
-      "total_delay": 118755,
-      "efficiency": 100.0
-    },
-    {
-      "step": 2780,
-      "active_vehicles": 7,
-      "idle_vehicles": 0,
-      "total_delay": 118764,
-      "efficiency": 100.0
-    },
-    {
-      "step": 2790,
-      "active_vehicles": 8,
-      "idle_vehicles": 1,
-      "total_delay": 118771,
-      "efficiency": 87.5
-    },
-    {
-      "step": 2800,
-      "active_vehicles": 8,
-      "idle_vehicles": 1,
-      "total_delay": 118777,
-      "efficiency": 87.5
-    },
-    {
-      "step": 2810,
-      "active_vehicles": 9,
-      "idle_vehicles": 1,
-      "total_delay": 118785,
-      "efficiency": 88.89
-    },
-    {
-      "step": 2820,
-      "active_vehicles": 7,
-      "idle_vehicles": 1,
-      "total_delay": 118795,
-      "efficiency": 85.71
-    },
-    {
-      "step": 2830,
-      "active_vehicles": 4,
-      "idle_vehicles": 1,
-      "total_delay": 118807,
-      "efficiency": 75.0
-    },
-    {
-      "step": 2840,
-      "active_vehicles": 6,
-      "idle_vehicles": 1,
-      "total_delay": 118817,
-      "efficiency": 83.33
-    },
-    {
-      "step": 2850,
-      "active_vehicles": 4,
-      "idle_vehicles": 1,
-      "total_delay": 118824,
-      "efficiency": 75.0
-    },
-    {
-      "step": 2860,
-      "active_vehicles": 6,
-      "idle_vehicles": 0,
-      "total_delay": 118835,
-      "efficiency": 100.0
-    },
-    {
-      "step": 2870,
-      "active_vehicles": 8,
-      "idle_vehicles": 1,
-      "total_delay": 118843,
-      "efficiency": 87.5
-    },
-    {
-      "step": 2880,
-      "active_vehicles": 7,
-      "idle_vehicles": 0,
-      "total_delay": 118849,
-      "efficiency": 100.0
-    },
-    {
-      "step": 2890,
-      "active_vehicles": 9,
-      "idle_vehicles": 2,
-      "total_delay": 118857,
-      "efficiency": 77.78
-    },
-    {
-      "step": 2900,
-      "active_vehicles": 8,
-      "idle_vehicles": 1,
-      "total_delay": 118864,
-      "efficiency": 87.5
+      "active_vehicles": 113,
+      "idle_vehicles": 108,
+      "total_delay": 30332,
+      "efficiency": 4.42
     }
   ],
-  "emergency_events": [
-    {
-      "step": 950,
-      "direction": "east"
-    }
-  ],
+  "emergency_events": [],
   "emergency_active": false,
   "emergency_direction": null,
   "lane_config": {
@@ -2061,38 +376,38 @@
   "lane_data": {
     "north": {
       "lanes": [
-        1,
-        7,
-        0
-      ],
-      "total": 8
-    },
-    "south": {
-      "lanes": [
-        16,
-        6
-      ],
-      "total": 22
-    },
-    "east": {
-      "lanes": [
-        11,
-        12,
+        15,
         7,
         18
       ],
-      "total": 48
+      "total": 40
+    },
+    "south": {
+      "lanes": [
+        17,
+        15
+      ],
+      "total": 32
+    },
+    "east": {
+      "lanes": [
+        4,
+        7,
+        0,
+        20
+      ],
+      "total": 31
     },
     "west": {
       "lanes": [
+        3,
         9,
-        12,
-        2
+        9
       ],
-      "total": 23
+      "total": 21
     }
   },
-  "efficiency": 53.78,
+  "efficiency": 13.44,
   "ambulance_in_sim": false,
   "ambulance_injected": true,
   "junction_count": 16,

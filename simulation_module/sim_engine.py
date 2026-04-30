@@ -1,5 +1,5 @@
 """
-TrafficFlow Simulation Engine v2.2
+TrafficFlow Simulation Engine v2.3
 - Smart adaptive signal control (queue + wait time + density scoring)
 - Green Wave corridor coordination
 - Vision module integration (optional)
@@ -10,12 +10,19 @@ TrafficFlow Simulation Engine v2.2
 - Multi-Lane Traffic System
 - Traffic Efficiency Score
 
---- NEW FEATURES (v2.2) ---
+--- FEATURES (v2.2) ---
 - Feature 1: Multi-Junction Traffic Control (enhanced logging)
 - Feature 2: Green Wave Coordination (enhanced logging)
 - Feature 3: Visual Ambulance in SUMO (real traci.vehicle.add)
 - Feature 4: Slow Down Simulation for GUI observation
 - Feature 5: Real-Time Dashboard Updates (periodic results.json writes)
+
+--- UPGRADED (v2.3) ---
+- Ambulance: bright red, enlarged (12m × 3m), speed 10 m/s for visibility
+- Ambulance: GUI camera auto-tracks with zoom
+- Ambulance: deterministic spawn at step 200
+- Ambulance: corridor-level priority (all signals ahead turn green)
+- Ambulance: enhanced emoji logging & fail-safe wrapping
 """
 import os
 import sys
@@ -131,13 +138,20 @@ def handle_emergency_priority(tl_id, direction, traci_module):
 
 
 # ══════════════════════════════════════════════════════════
-# FEATURE 3: Visual Ambulance in SUMO 🚑
+# FEATURE 3 (v2.3): Visual Ambulance in SUMO 🚑
+#   - Deterministic spawn at step 200
+#   - Bright red, enlarged, reduced speed for visibility
+#   - GUI camera auto-tracking with zoom
+#   - Corridor-level priority (all upcoming signals → green)
+#   - Fail-safe wrapping throughout
 # ══════════════════════════════════════════════════════════
-AMBULANCE_INJECT_STEP = 300   # Step at which to inject ambulance
-AMBULANCE_SPEED = 20.0        # m/s (~72 km/h) — fast priority speed
+AMBULANCE_INJECT_STEP = 200   # Deterministic spawn step
+AMBULANCE_SPEED = 10.0        # m/s (~36 km/h) — slower for visibility
 ambulance_injected = False
 ambulance_in_sim = False
-ambulance_route_edges = None  # Will be set dynamically
+ambulance_route_edges = None   # Will be set dynamically
+# Stores original signal programs so we can restore them after ambulance clears
+_saved_signal_programs = {}    # {tl_id: (programID, phase_index)}
 
 
 def get_long_route_edges():
@@ -168,14 +182,27 @@ def get_long_route_edges():
 def inject_ambulance(step):
     """
     Add a real ambulance vehicle into the SUMO simulation.
-    - Unique ID: 'ambulance_1'
-    - Red color (255, 0, 0)
-    - High speed
+    v2.3 enhancements:
+      - Bright red color (255, 0, 0)
+      - Enlarged size (12m length, 3m width) for visibility
+      - Reduced speed (10 m/s) so user can observe in GUI
+      - GUI camera auto-tracks the ambulance with zoom
+      - Full fail-safe wrapping
     """
     global ambulance_injected, ambulance_in_sim, ambulance_route_edges
 
     if ambulance_injected:
         return False
+
+    # Fail-safe: ensure ambulance doesn't already exist
+    try:
+        if "ambulance_1" in traci.vehicle.getIDList():
+            print("  ⚠️  ambulance_1 already exists in simulation, skipping inject")
+            ambulance_injected = True
+            ambulance_in_sim = True
+            return False
+    except Exception:
+        pass
 
     ambulance_route_edges = get_long_route_edges()
 
@@ -189,65 +216,152 @@ def inject_ambulance(step):
             typeID="DEFAULT_VEHTYPE",
             depart="now",
         )
-        # Set ambulance visual properties
+
+        # ── Visual enhancements ──
         traci.vehicle.setColor("ambulance_1", (255, 0, 0, 255))  # Bright red
-        traci.vehicle.setSpeedMode("ambulance_1", 0)  # Disable all speed checks
-        traci.vehicle.setSpeed("ambulance_1", AMBULANCE_SPEED)
+        traci.vehicle.setLength("ambulance_1", 12)                # Large vehicle
+        traci.vehicle.setWidth("ambulance_1", 3)                  # Wide vehicle
+        traci.vehicle.setSpeedMode("ambulance_1", 0)              # Disable speed checks
+        traci.vehicle.setSpeed("ambulance_1", AMBULANCE_SPEED)    # 10 m/s for visibility
+
+        # ── GUI camera tracking ──
+        if USE_GUI:
+            try:
+                traci.gui.trackVehicle("View #0", "ambulance_1")
+                traci.gui.setZoom("View #0", 800)
+                print("  🚑 Tracking enabled — GUI camera locked on ambulance_1")
+            except Exception as gui_err:
+                print(f"  ⚠️  GUI tracking not available: {gui_err}")
 
         ambulance_injected = True
         ambulance_in_sim = True
 
-        print(f"\n  🚑 VISUAL AMBULANCE INJECTED at step {step}")
-        print(f"  🚑 Ambulance moving through simulation")
+        print(f"\n{'═'*55}")
+        print(f"  🚑 Ambulance injected at step {step}")
+        print(f"  📐 Size: 12m × 3m | Speed: {AMBULANCE_SPEED} m/s")
         print(f"  📍 Route: {' → '.join(ambulance_route_edges[:4])}...")
+        print(f"{'═'*55}")
         return True
     except Exception as e:
         print(f"  ⚠️  Failed to inject ambulance: {e}")
         return False
 
 
+def _get_remaining_route_edges():
+    """
+    Return only the edges the ambulance has NOT yet passed,
+    so we only clear signals that are still ahead.
+    """
+    try:
+        full_route = traci.vehicle.getRoute("ambulance_1")
+        route_idx = traci.vehicle.getRouteIndex("ambulance_1")
+        return list(full_route[route_idx:])
+    except Exception:
+        return list(traci.vehicle.getRoute("ambulance_1"))
+
+
+def _build_edge_to_tl_map():
+    """
+    Build a mapping: edge_id → set of traffic light IDs controlling that edge.
+    Called once and cached so corridor clearing is fast.
+    """
+    edge_tl = {}
+    for tl_id in traffic_lights:
+        try:
+            controlled_lanes = traci.trafficlight.getControlledLanes(tl_id)
+            for lane in controlled_lanes:
+                parts = lane.rsplit("_", 1)
+                if len(parts) == 2:
+                    edge_tl.setdefault(parts[0], set()).add(tl_id)
+        except Exception:
+            continue
+    return edge_tl
+
+
+# Pre-built after TL discovery (populated at module level after traffic_lights is set)
+_edge_to_tl = {}  # Will be populated after traffic_lights list is ready
+
+
 def clear_path_for_ambulance():
     """
-    Detect ambulance position and turn all upcoming traffic lights
-    GREEN along its path. This implements PRIORITY ROUTE CLEARING.
+    CORRIDOR-LEVEL PRIORITY (v2.3):
+    - Identify all traffic lights on the ambulance's REMAINING route
+    - Force ALL of them to their first green phase simultaneously
+    - Save their prior state so we can restore after ambulance clears
     """
-    global ambulance_in_sim
+    global ambulance_in_sim, _edge_to_tl
 
     try:
         # Check if ambulance is still in the simulation
         if "ambulance_1" not in traci.vehicle.getIDList():
             if ambulance_in_sim:
-                print("  ✅ Ambulance has exited the simulation. Path clearing ended.")
+                print(f"\n{'═'*55}")
+                print("  ✅ Ambulance cleared, restoring normal signals")
+                print(f"{'═'*55}")
+                _restore_signals()
                 ambulance_in_sim = False
             return False
 
-        # Get the ambulance's current road (edge)
+        # Lazy-init the edge→TL map
+        if not _edge_to_tl:
+            _edge_to_tl = _build_edge_to_tl_map()
+
+        # Get ambulance's current edge and remaining route
         current_edge = traci.vehicle.getRoadID("ambulance_1")
-        upcoming_route = traci.vehicle.getRoute("ambulance_1")
+        remaining_edges = _get_remaining_route_edges()
 
-        # Find which traffic lights are on the ambulance's remaining route
+        # Collect all TL IDs that control edges ahead
+        tls_to_clear = set()
+        for edge in remaining_edges:
+            if edge in _edge_to_tl:
+                tls_to_clear.update(_edge_to_tl[edge])
+
+        # Force green on every signal along the corridor
         cleared_count = 0
-        for tl_id in traffic_lights:
-            controlled_lanes = set(traci.trafficlight.getControlledLanes(tl_id))
-            # Extract edge IDs from lane IDs
-            controlled_edges = set()
-            for lane in controlled_lanes:
-                parts = lane.rsplit("_", 1)
-                if len(parts) == 2:
-                    controlled_edges.add(parts[0])
-
-            # If this TL controls an edge on the ambulance's route, force green
-            if controlled_edges & set(upcoming_route):
+        for tl_id in tls_to_clear:
+            try:
+                # Save current state for later restoration (only first time)
+                if tl_id not in _saved_signal_programs:
+                    _saved_signal_programs[tl_id] = (
+                        traci.trafficlight.getProgram(tl_id),
+                        traci.trafficlight.getPhase(tl_id),
+                    )
+                # Force first green phase
                 handle_emergency_priority(tl_id, None, traci)
                 cleared_count += 1
+            except Exception:
+                continue
 
         if cleared_count > 0:
-            print(f"  🚦 Clearing path for emergency vehicle — {cleared_count} signals overridden")
+            print(
+                f"  🚦 Corridor priority activated — "
+                f"{cleared_count} signals green | "
+                f"Ambulance on edge: {current_edge}"
+            )
         return True
 
-    except Exception:
+    except Exception as e:
+        print(f"  ⚠️  Corridor clearing error: {e}")
         ambulance_in_sim = False
         return False
+
+
+def _restore_signals():
+    """
+    Restore traffic signals to their saved state after ambulance has cleared.
+    This ensures normal adaptive logic resumes cleanly.
+    """
+    restored = 0
+    for tl_id, (prog_id, phase_idx) in _saved_signal_programs.items():
+        try:
+            traci.trafficlight.setProgram(tl_id, prog_id)
+            traci.trafficlight.setPhase(tl_id, phase_idx)
+            restored += 1
+        except Exception:
+            continue
+    _saved_signal_programs.clear()
+    if restored > 0:
+        print(f"  🔄 Restored {restored} signals to normal adaptive control")
 
 
 # ── Traffic Efficiency Score 📊 ───────────────────────────
@@ -454,14 +568,14 @@ while traci.simulation.getMinExpectedNumber() > 0:
                 emergency_direction = None
 
     # ══════════════════════════════════════════════════════
-    # FEATURE 3: Visual Ambulance Injection & Path Clearing
+    # FEATURE 3 (v2.3): Ambulance Injection & Corridor Priority
     # ══════════════════════════════════════════════════════
-    # Inject ambulance at the configured step
+    # Deterministic spawn at step 200
     if step == AMBULANCE_INJECT_STEP:
         inject_ambulance(step)
 
-    # If ambulance is in the simulation, clear its path every 10 steps
-    if ambulance_in_sim and step % 10 == 0:
+    # Corridor-level priority: clear ALL signals ahead every 5 steps
+    if ambulance_in_sim and step % 5 == 0:
         clear_path_for_ambulance()
 
     # ── Adaptive control (every 20 steps) ──
@@ -534,7 +648,7 @@ saved_co2 = saved_idle * config.EMISSION_FACTOR
 avg_efficiency = sum(efficiency_history) / len(efficiency_history) if efficiency_history else 0.0
 
 print("\n" + "=" * 55)
-print("          PERFORMANCE SUMMARY (v2.2)")
+print("          PERFORMANCE SUMMARY (v2.3)")
 print("=" * 55)
 print(f"  Mode:                    {MODE}")
 print(f"  Simulation Steps:        {step}")
