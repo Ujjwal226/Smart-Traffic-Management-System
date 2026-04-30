@@ -2,7 +2,7 @@
 
 > **AI-powered adaptive traffic signal control system** combining real-time computer vision (YOLOv8) with microscopic traffic simulation (SUMO) to reduce congestion, optimize signal timings, and cut CO₂ emissions.
 
-🚀 **Enhanced Version:** Now supports multi-junction control, emergency vehicle prioritization, and real-time dynamic analytics.
+🚀 **Final Enhanced Version:** Now supports multi-junction control, true multi-lane simulation, ambulance priority, incident simulation, and real-time API-based data pipeline with fallback reliability.
 
 ---
 
@@ -39,14 +39,16 @@ Smart Traffic Control Management System solves urban traffic congestion using:
 
 * Upgraded from single → **16 real-world junctions**
 * Based on OpenStreetMap network
-* Independent signal control at each junction
+* Independent adaptive signal control at each junction
 
 ---
 
-## 🚗 Multi-Lane Traffic Modeling
+## 🚗 True Multi-Lane Traffic Modeling
 
-* Each direction supports multiple lanes
-* Example:
+* Roads now support **2–4 lanes per direction**
+* Vehicles distributed realistically across lanes
+
+Example:
 
 ```
 NORTH: [13, 20, 18] → Total: 51
@@ -56,15 +58,15 @@ NORTH: [13, 20, 18] → Total: 51
 
 ---
 
-## 🚑 Emergency Vehicle (Ambulance System)
+## 🚑 Emergency Vehicle (Ambulance) System
 
 * Real ambulance integrated into SUMO simulation
 * Features:
 
-  * Visual injection into traffic
-  * Route traversal
-  * Signal priority override
-  * Automatic recovery
+  * Ambulance injected at user-defined step
+  * Route traversal with proper lane following
+  * Traffic-aware signal priority override
+  * Dashboard alert + log
 
 Flow:
 
@@ -74,14 +76,33 @@ Flow:
 
 * Dashboard shows:
 
-  * Live ambulance alerts
-  * Emergency logs
+  * Real-time ambulance alerts
+  * Emergency event log
+  * Emergency duration
+
+---
+
+## 🚧 Road Incident / Accident Simulation
+
+* Dashboard-triggered incident simulation
+* Features:
+
+  * Blockage at specified junction
+  * Traffic congestion build-up
+  * Visual dashboard alerts
+  * Emergency duration tracking
+
+Flow:
+
+```
+🚨 Dashboard → Activate Incident → 🚧 Congestion → Emergency Alert → Clear
+```
 
 ---
 
 ## 📊 Real-Time Dynamic Dashboard
 
-* Auto-refresh enabled (near real-time)
+* True 2-second refresh rate (Streamlit + requests)
 * Continuously updates:
 
   * Traffic efficiency
@@ -93,20 +114,21 @@ Flow:
 
 ## 📈 Advanced Traffic Analytics
 
-* Traffic Efficiency Score
+* Traffic Efficiency Score (0–100)
 * Active vs Idle Vehicles
 * CO₂ Emission Savings
 * Delay Tracking
 * Congestion Distribution
+* Emergency Event Analysis
 
 ---
 
 ## 🌍 Real-World Map Integration
 
-* Uses OSM → SUMO conversion
+* Uses OpenStreetMap → SUMO conversion
 * Supports:
 
-  * Multiple intersections
+  * 16 junctions
   * Realistic road layouts
   * Geographic visualization
 
@@ -123,11 +145,14 @@ Flow:
 
 ---
 
-## 🔄 Real-Time Data Flow
+## 🔄 Real-Time Data Flow (API-Based)
 
 ```
-SUMO Simulation → results.json → Streamlit Dashboard → Live Updates
+SUMO Simulation → results.json → API (http://localhost:9000/data) → Streamlit Dashboard → Live Updates
 ```
+
+* No file polling — true real-time streaming
+* Automatic fallback to JSON file if API unavailable
 
 ---
 
@@ -142,13 +167,14 @@ Vision Module → Vehicle Count → Simulation Engine → Dashboard
 ## ⚙️ Installation
 
 ```bash
-git clone https://github.com/Ujjwal226/Smart-Traffic-Management-System.git
-cd TrafficFlow-AI-GreenWave
-
-git lfs install
-git lfs pull
-
+# Install dependencies
 pip install -r requirements.txt
+
+# Or install from scratch
+pip install streamlit pandas plotly requests
+pip install traci
+pip install ultralytics
+pip install shapely matplotlib osmnx
 ```
 
 ---
@@ -167,6 +193,19 @@ python run_all.py --gui --sim-only
 streamlit run dashboard/app.py
 ```
 
+### Full System
+
+```bash
+# Terminal 1: Simulation
+python run_all.py --gui
+
+# Terminal 2: Dashboard
+streamlit run dashboard/app.py
+
+# Terminal 3: API (optional)
+python vision_api.py
+```
+
 ---
 
 ## 🧪 Demo Workflow
@@ -178,11 +217,12 @@ streamlit run dashboard/app.py
    * Multi-junction signals
    * Multi-lane traffic
    * Ambulance priority
+   * Incident simulation
    * Real-time analytics
 
 ---
 
-## 📊 Performance Results
+## 🎯 Performance Results
 
 * 2000+ vehicles simulated
 * 25–30% delay reduction
@@ -196,17 +236,24 @@ streamlit run dashboard/app.py
 
 * YOLOv8-based vehicle detection
 * FastAPI backend
+* Multi-camera support
 
 ### 🚗 Simulation Module
 
 * SUMO + TraCI
 * Adaptive signal control
 * Emergency vehicle handling
+* Incident simulation
+* Multi-lane support
+* Real-world OSM network
 
 ### 📊 Dashboard
 
 * Streamlit + Plotly
-* Real-time visualization
+* Real-time analytics
+* Video feed integration
+* Emergency alert system
+* Incident simulation interface
 
 ---
 
