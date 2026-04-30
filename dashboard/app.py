@@ -10,6 +10,7 @@ Launch:  streamlit run dashboard/app.py
 - Junction signal log viewer
 """
 import sys, os, json, time, math
+import requests
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
@@ -122,7 +123,16 @@ st.markdown("""
 
 # ── Helper: load results (no cache for live mode) ────────
 def load_results():
-    """Load simulation results from JSON (uncached for real-time updates)."""
+    """Load simulation results from API or fallback to JSON."""
+    try:
+        response = requests.get("http://127.0.0.1:9000/data", timeout=0.5)
+        if response.status_code == 200:
+            data = response.json()
+            if data:  # Ensure it's not empty
+                return data
+    except Exception:
+        pass  # API failed, fallback to JSON file
+
     if not os.path.exists(RESULTS_FILE):
         return None
     try:

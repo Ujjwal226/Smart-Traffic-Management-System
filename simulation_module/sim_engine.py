@@ -29,6 +29,7 @@ import sys
 import json
 import time
 import random
+import requests
 
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -513,6 +514,11 @@ def save_live_results(step, sim_start):
     except Exception:
         pass  # Don't crash the simulation if file write fails
 
+    try:
+        requests.post("http://127.0.0.1:9000/update", json=live_results, timeout=0.2)
+    except Exception:
+        pass  # Ignore silently if API fails
+
 
 # ── Simulation Loop ──────────────────────────────────────
 sim_start = time.time()
@@ -703,6 +709,11 @@ results = {
 
 with open(config.RESULTS_FILE, "w") as f:
     json.dump(results, f, indent=2)
+
+try:
+    requests.post("http://127.0.0.1:9000/update", json=results, timeout=0.5)
+except Exception:
+    pass
 
 print(f"\n📊 Results saved to {config.RESULTS_FILE}")
 
