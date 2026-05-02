@@ -30,6 +30,24 @@ import json
 import time
 import random
 import requests
+import builtins
+
+# --- LOGGING SETUP ---
+LOG_FILE_PATH = os.path.join(os.path.dirname(__file__), "..", "logs.txt")
+_log_file = open(LOG_FILE_PATH, "a", encoding="utf-8")
+_original_print = builtins.print
+
+def _custom_print(*args, **kwargs):
+    _original_print(*args, **kwargs)
+    if "file" not in kwargs:
+        try:
+            _log_file.write(" ".join(str(a) for a in args) + "\n")
+            _log_file.flush()
+        except Exception:
+            pass
+
+builtins.print = _custom_print
+# ---------------------
 
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))

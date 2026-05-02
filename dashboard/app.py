@@ -38,36 +38,42 @@ st.set_page_config(
 st.markdown("""
 <style>
     .metric-card {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        border: 1px solid #0f3460;
-        border-radius: 16px;
-        padding: 20px 24px;
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        border: 1px solid #374151;
+        border-radius: 12px;
+        padding: 20px;
         text-align: center;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        border-color: #4b5563;
     }
     .metric-card h3 {
-        color: #a8b2d1;
+        color: #9ca3af;
         font-size: 0.85rem;
-        margin-bottom: 4px;
+        margin-bottom: 8px;
         text-transform: uppercase;
         letter-spacing: 1px;
     }
     .metric-card .value {
-        color: #ccd6f6;
+        color: #f3f4f6;
         font-size: 2.2rem;
         font-weight: 700;
         line-height: 1.2;
     }
-    .metric-card .delta { font-size: 0.9rem; margin-top: 4px; }
-    .delta-good { color: #64ffda; }
-    .delta-bad  { color: #ff6b6b; }
-    .stApp { background-color: #0a0a23; }
-    header[data-testid="stHeader"] { background-color: #0a0a23; }
-    .block-container { padding-top: 1rem; }
-    h1, h2, h3 { color: #ccd6f6 !important; }
-    .sidebar .sidebar-content { background-color: #112240; }
+    .metric-card .delta { font-size: 0.9rem; margin-top: 6px; font-weight: 500; }
+    .delta-good { color: #34d399; }
+    .delta-bad  { color: #f87171; }
+    .stApp { background-color: #030712; }
+    header[data-testid="stHeader"] { background-color: transparent !important; }
+    .block-container { padding-top: 2rem; max-width: 1400px; }
+    h1, h2, h3, h4 { color: #f3f4f6 !important; font-weight: 600 !important; }
+    .sidebar .sidebar-content { background-color: #111827; border-right: 1px solid #1f2937; }
     .emergency-alert {
-        background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         border-radius: 12px;
         padding: 16px 24px;
         text-align: center;
@@ -76,16 +82,16 @@ st.markdown("""
         font-size: 1.1rem;
         margin-bottom: 16px;
         animation: pulse 2s infinite;
-        box-shadow: 0 4px 20px rgba(255,65,108,0.4);
+        box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
     }
     @keyframes pulse {
-        0% { box-shadow: 0 4px 20px rgba(255,65,108,0.4); }
-        50% { box-shadow: 0 4px 30px rgba(255,65,108,0.7); }
-        100% { box-shadow: 0 4px 20px rgba(255,65,108,0.4); }
+        0% { box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4); }
+        50% { box-shadow: 0 4px 30px rgba(239, 68, 68, 0.7); }
+        100% { box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4); }
     }
     /* NEW: Live simulation indicator */
     .live-indicator {
-        background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         border-radius: 12px;
         padding: 12px 20px;
         text-align: center;
@@ -94,15 +100,16 @@ st.markdown("""
         font-size: 1rem;
         margin-bottom: 12px;
         animation: live-pulse 1.5s infinite;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
     }
     @keyframes live-pulse {
         0% { opacity: 1; }
-        50% { opacity: 0.7; }
+        50% { opacity: 0.85; }
         100% { opacity: 1; }
     }
     /* NEW: Ambulance in-simulation alert */
     .ambulance-sim-alert {
-        background: linear-gradient(135deg, #e17055 0%, #d63031 100%);
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
         border-radius: 12px;
         padding: 14px 20px;
         text-align: center;
@@ -111,11 +118,24 @@ st.markdown("""
         font-size: 1rem;
         margin-bottom: 12px;
         animation: amb-flash 1s infinite;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
     }
     @keyframes amb-flash {
         0% { opacity: 1; }
-        50% { opacity: 0.5; }
+        50% { opacity: 0.7; }
         100% { opacity: 1; }
+    }
+    .log-container {
+        background-color: #111827;
+        border: 1px solid #374151;
+        border-radius: 8px;
+        padding: 12px;
+        font-family: monospace;
+        font-size: 0.85rem;
+        color: #d1d5db;
+        max-height: 400px;
+        overflow-y: auto;
+        white-space: pre-wrap;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -175,15 +195,15 @@ with st.sidebar:
     # ══════════════════════════════════════════════════════
     # FEATURE 5: Real-Time Dashboard — 2-second refresh
     # ══════════════════════════════════════════════════════
-    auto_refresh = st.toggle("🔄 Auto-Refresh (2s)", value=False)
-    if auto_refresh:
-        time.sleep(2)
-        st.rerun()
+    try:
+        from streamlit_autorefresh import st_autorefresh
+        st_autorefresh(interval=2000, key="refresh")
+    except ImportError:
+        st.warning("Please install streamlit-autorefresh for auto-updates.")
 
     st.divider()
     st.markdown(f"**Results file:** `results.json`")
     st.markdown(f"**Vision API:** `http://localhost:{VISION_API_PORT}`")
-    st.markdown(f"---\n*Built with ❤️ by Team GreenWave*")
 
 
 # ── Load Data ────────────────────────────────────────────
@@ -641,6 +661,27 @@ if junction_log:
     with st.expander("🚦 Junction Signal Change Log"):
         jl_df = pd.DataFrame(junction_log)
         st.dataframe(jl_df, use_container_width=True, hide_index=True)
+
+st.divider()
+
+# ── Simulation Logs (Terminal Output) ────────────────────
+st.subheader("🖥️ Simulation Logs")
+log_file_path = os.path.join(PROJECT_ROOT, "logs.txt")
+
+if os.path.exists(log_file_path):
+    try:
+        with open(log_file_path, "r", encoding="utf-8") as log_file:
+            # Read last 100 lines
+            log_lines = log_file.readlines()[-100:]
+            if log_lines:
+                log_content = "".join(log_lines)
+                st.markdown(f'<div class="log-container">{log_content}</div>', unsafe_allow_html=True)
+            else:
+                st.info("No logs available")
+    except Exception as e:
+        st.error(f"Error reading logs: {e}")
+else:
+    st.info("No logs available")
 
 # ── Raw Data Explorer ────────────────────────────────────
 with st.expander("📋 Raw Simulation Results"):
