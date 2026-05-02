@@ -6,14 +6,40 @@ import os
 import sys
 
 # ── SUMO Configuration ──────────────────────────────────
-# Prefer pip-installed eclipse-sumo, fall back to SUMO_HOME env var
-PIP_SUMO = os.path.join(
-    sys.prefix, "lib", f"python{sys.version_info.major}.{sys.version_info.minor}",
-    "site-packages", "sumo"
-)
+# Locate pip-installed eclipse-sumo package using importlib (cross-platform)
+def _find_sumo_home():
+    # Method 1: try importlib to find the installed 'sumo' package
+    try:
+        import importlib.util
+        spec = importlib.util.find_spec("sumo")
+        if spec and spec.origin:
+            pkg_dir = os.path.dirname(spec.origin)
+            if os.path.isdir(os.path.join(pkg_dir, "bin")):
+                return pkg_dir
+    except Exception:
+        pass
 
-if os.path.exists(PIP_SUMO):
-    SUMO_HOME = PIP_SUMO
+    # Method 2: Linux-style path (used on Mac/Linux with venv)
+    pip_sumo = os.path.join(
+        sys.prefix, "lib",
+        f"python{sys.version_info.major}.{sys.version_info.minor}",
+        "site-packages", "sumo"
+    )
+    if os.path.exists(pip_sumo):
+        return pip_sumo
+
+    # Method 3: Windows user site-packages (pip install --user)
+    import site
+    for sp in site.getsitepackages() + [site.getusersitepackages()]:
+        candidate = os.path.join(sp, "sumo")
+        if os.path.isdir(candidate) and os.path.isdir(os.path.join(candidate, "bin")):
+            return candidate
+
+    return None
+
+_sumo_home = _find_sumo_home()
+if _sumo_home:
+    SUMO_HOME = _sumo_home
 elif "SUMO_HOME" in os.environ:
     SUMO_HOME = os.environ["SUMO_HOME"]
 else:
@@ -21,8 +47,10 @@ else:
 
 os.environ["SUMO_HOME"] = SUMO_HOME
 
-SUMO_BIN = os.path.join(SUMO_HOME, "bin", "sumo")
-SUMO_GUI_BIN = os.path.join(SUMO_HOME, "bin", "sumo-gui")
+# On Windows the binaries have .exe extension
+_exe = ".exe" if sys.platform == "win32" else ""
+SUMO_BIN = os.path.join(SUMO_HOME, "bin", f"sumo{_exe}")
+SUMO_GUI_BIN = os.path.join(SUMO_HOME, "bin", f"sumo-gui{_exe}")
 SUMO_TOOLS = os.path.join(SUMO_HOME, "tools")
 
 # Add SUMO tools to Python path (for traci, sumolib)

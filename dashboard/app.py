@@ -16,6 +16,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime
+from streamlit_autorefresh import st_autorefresh
 
 # ── Project imports ──────────────────────────────────────
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -37,105 +38,119 @@ st.set_page_config(
 # ── Custom CSS ───────────────────────────────────────────
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+    
+    * {
+        font-family: 'Outfit', sans-serif !important;
+    }
+    
+    .stApp { 
+        background: #080811; 
+        background-image: radial-gradient(circle at top right, rgba(100, 255, 218, 0.05), transparent 400px),
+                          radial-gradient(circle at bottom left, rgba(189, 147, 249, 0.05), transparent 400px);
+    }
+    header[data-testid="stHeader"] { background-color: transparent !important; }
+    
+    h1, h2, h3 { 
+        color: #f8f8f2 !important; 
+        font-weight: 800 !important;
+    }
+    
+    /* Sleek metric cards */
     .metric-card {
-        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-        border: 1px solid #374151;
-        border-radius: 12px;
-        padding: 20px;
+        background: rgba(22, 25, 43, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 24px 20px;
         text-align: center;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s ease, border-color 0.3s ease;
     }
     .metric-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        border-color: #4b5563;
+        border-color: rgba(100, 255, 218, 0.3);
     }
     .metric-card h3 {
-        color: #9ca3af;
+        color: #8be9fd !important;
         font-size: 0.85rem;
+        font-weight: 600 !important;
         margin-bottom: 8px;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 1.5px;
     }
     .metric-card .value {
-        color: #f3f4f6;
-        font-size: 2.2rem;
-        font-weight: 700;
-        line-height: 1.2;
+        color: #f8f8f2;
+        font-size: 2.5rem;
+        font-weight: 800;
+        font-family: 'JetBrains Mono', monospace !important;
+        line-height: 1.1;
+        background: linear-gradient(135deg, #ffffff 0%, #a8b2d1 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
-    .metric-card .delta { font-size: 0.9rem; margin-top: 6px; font-weight: 500; }
-    .delta-good { color: #34d399; }
-    .delta-bad  { color: #f87171; }
-    .stApp { background-color: #030712; }
-    header[data-testid="stHeader"] { background-color: transparent !important; }
-    .block-container { padding-top: 2rem; max-width: 1400px; }
-    h1, h2, h3, h4 { color: #f3f4f6 !important; font-weight: 600 !important; }
-    .sidebar .sidebar-content { background-color: #111827; border-right: 1px solid #1f2937; }
-    .emergency-alert {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        border-radius: 12px;
+    .metric-card .delta { font-size: 0.9rem; margin-top: 8px; font-weight: 600; }
+    .delta-good { color: #50fa7b; }
+    .delta-bad  { color: #ff5555; }
+    
+    /* Sidebar */
+    [data-testid="stSidebar"] {
+        background: rgba(12, 14, 25, 0.95) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    /* Alerts */
+    .emergency-alert, .ambulance-sim-alert {
+        background: linear-gradient(135deg, rgba(255, 85, 85, 0.9) 0%, rgba(255, 65, 108, 0.9) 100%);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
         padding: 16px 24px;
         text-align: center;
         color: white;
-        font-weight: 700;
-        font-size: 1.1rem;
-        margin-bottom: 16px;
+        font-weight: 800;
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 32px rgba(255, 85, 85, 0.3);
         animation: pulse 2s infinite;
-        box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+        letter-spacing: 1px;
     }
     @keyframes pulse {
-        0% { box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4); }
-        50% { box-shadow: 0 4px 30px rgba(239, 68, 68, 0.7); }
-        100% { box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4); }
+        0% { box-shadow: 0 0 0 0 rgba(255, 85, 85, 0.4); }
+        70% { box-shadow: 0 0 0 15px rgba(255, 85, 85, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 85, 85, 0); }
     }
-    /* NEW: Live simulation indicator */
+    
     .live-indicator {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        border-radius: 12px;
-        padding: 12px 20px;
+        background: rgba(80, 250, 123, 0.1);
+        border: 1px solid #50fa7b;
+        color: #50fa7b;
+        border-radius: 50px;
+        padding: 8px 20px;
         text-align: center;
-        color: white;
-        font-weight: 700;
-        font-size: 1rem;
-        margin-bottom: 12px;
-        animation: live-pulse 1.5s infinite;
-        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        letter-spacing: 1px;
+        margin-left: auto;
+        margin-right: auto;
     }
-    @keyframes live-pulse {
-        0% { opacity: 1; }
-        50% { opacity: 0.85; }
-        100% { opacity: 1; }
+    .live-indicator::before {
+        content: '';
+        width: 10px;
+        height: 10px;
+        background-color: #50fa7b;
+        border-radius: 50%;
+        animation: blink 1s infinite;
     }
-    /* NEW: Ambulance in-simulation alert */
-    .ambulance-sim-alert {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        border-radius: 12px;
-        padding: 14px 20px;
-        text-align: center;
-        color: white;
-        font-weight: 700;
-        font-size: 1rem;
-        margin-bottom: 12px;
-        animation: amb-flash 1s infinite;
-        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
-    }
-    @keyframes amb-flash {
-        0% { opacity: 1; }
-        50% { opacity: 0.7; }
-        100% { opacity: 1; }
-    }
-    .log-container {
-        background-color: #111827;
-        border: 1px solid #374151;
-        border-radius: 8px;
-        padding: 12px;
-        font-family: monospace;
-        font-size: 0.85rem;
-        color: #d1d5db;
-        max-height: 400px;
-        overflow-y: auto;
-        white-space: pre-wrap;
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -195,15 +210,14 @@ with st.sidebar:
     # ══════════════════════════════════════════════════════
     # FEATURE 5: Real-Time Dashboard — 2-second refresh
     # ══════════════════════════════════════════════════════
-    try:
-        from streamlit_autorefresh import st_autorefresh
-        st_autorefresh(interval=2000, key="refresh")
-    except ImportError:
-        st.warning("Please install streamlit-autorefresh for auto-updates.")
+    auto_refresh = st.toggle("🔄 Auto-Refresh (2s)", value=True, help="Enable live data streaming")
+    if auto_refresh:
+        st_autorefresh(interval=2000, key="data_refresh")
 
     st.divider()
     st.markdown(f"**Results file:** `results.json`")
     st.markdown(f"**Vision API:** `http://localhost:{VISION_API_PORT}`")
+    st.markdown(f"---\n*Built with ❤️ by Team GreenWave*")
 
 
 # ── Load Data ────────────────────────────────────────────
@@ -289,11 +303,13 @@ if emergency_events:
     )
 
 # ── Header ───────────────────────────────────────────────
-st.markdown("# 🚦 TrafficFlow AI – GreenWave Dashboard")
-live_badge = "  •  🟢 **LIVE**" if is_live else ""
-st.caption(
+st.markdown("<h1 style='text-align: center; margin-bottom: 0; background: linear-gradient(90deg, #64ffda, #bd93f9); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>🚦 Smart Traffic Dashboard</h1>", unsafe_allow_html=True)
+live_badge = "  •  <span style='color:#50fa7b; font-weight:bold;'>🟢 LIVE</span>" if is_live else ""
+st.markdown(
+    f"<p style='text-align: center; color: #6272a4; margin-bottom: 30px; font-weight:600;'>"
     f"Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  •  "
-    f"Mode: **{data.get('mode', 'N/A').upper()}**{live_badge}"
+    f"Mode: <b>{data.get('mode', 'N/A').upper()}</b>{live_badge}</p>", 
+    unsafe_allow_html=True
 )
 
 # ── KPI Cards Row ────────────────────────────────────────
@@ -661,27 +677,6 @@ if junction_log:
     with st.expander("🚦 Junction Signal Change Log"):
         jl_df = pd.DataFrame(junction_log)
         st.dataframe(jl_df, use_container_width=True, hide_index=True)
-
-st.divider()
-
-# ── Simulation Logs (Terminal Output) ────────────────────
-st.subheader("🖥️ Simulation Logs")
-log_file_path = os.path.join(PROJECT_ROOT, "logs.txt")
-
-if os.path.exists(log_file_path):
-    try:
-        with open(log_file_path, "r", encoding="utf-8") as log_file:
-            # Read last 100 lines
-            log_lines = log_file.readlines()[-100:]
-            if log_lines:
-                log_content = "".join(log_lines)
-                st.markdown(f'<div class="log-container">{log_content}</div>', unsafe_allow_html=True)
-            else:
-                st.info("No logs available")
-    except Exception as e:
-        st.error(f"Error reading logs: {e}")
-else:
-    st.info("No logs available")
 
 # ── Raw Data Explorer ────────────────────────────────────
 with st.expander("📋 Raw Simulation Results"):

@@ -18,4 +18,3 @@ plotly>=5.18.0
 pandas>=2.0.0
 folium>=0.15.0
 streamlit-folium>=0.15.0
-streamlit-autorefresh>=1.0.1

@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🚦 TrafficFlow AI – Live Monitor</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a1a;
+      --panel: #0f0f2a;
+      --border: #1a1a4a;
+      --accent: #64ffda;
+      --accent2: #bd93f9;
+      --red: #ff5555;
+      --orange: #ffb86c;
+      --green: #50fa7b;
+      --yellow: #f1fa8c;
+      --text: #ccd6f6;
+      --muted: #6272a4;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Top Bar ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 24px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    header h1 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(80,250,123,0.1);
+      border: 1px solid var(--green);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--green);
+    }
+    .live-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse-dot 1s infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    /* ── KPI Row ── */
+    .kpi-bar {
+      display: flex;
+      gap: 12px;
+      padding: 12px 24px;
+      background: rgba(15,15,42,0.8);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      overflow-x: auto;
+    }
+    .kpi {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: linear-gradient(135deg, #1a1a3e, #0f0f2a);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 20px;
+      min-width: 130px;
+      transition: border-color 0.3s;
+    }
+    .kpi:hover { border-color: var(--accent); }
+    .kpi-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .kpi-value {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .kpi-value.red { color: var(--red); }
+    .kpi-value.orange { color: var(--orange); }
+    .kpi-value.purple { color: var(--accent2); }
+    .kpi-value.green { color: var(--green); }
+
+    /* ── Main Layout ── */
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      gap: 0;
+    }
+
+    /* ── Terminal Panel ── */
+    .terminal-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      min-width: 0;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      background: rgba(10,10,26,0.9);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .panel-header .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-red { background: #ff5f57; }
+    .dot-yellow { background: #febc2e; }
+    .dot-green { background: #28c840; }
+
+    #terminal {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.7;
+      background: #090915;
+    }
+    #terminal::-webkit-scrollbar { width: 6px; }
+    #terminal::-webkit-scrollbar-track { background: transparent; }
+    #terminal::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .log-line {
+      display: flex;
+      gap: 12px;
+      padding: 1px 0;
+      border-radius: 4px;
+      animation: fade-in 0.2s ease;
+    }
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateX(-4px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .log-line:hover { background: rgba(255,255,255,0.02); }
+    .log-ts {
+      color: var(--muted);
+      font-size: 0.7rem;
+      min-width: 80px;
+      user-select: none;
+      margin-top: 2px;
+    }
+    .log-text { color: var(--text); word-break: break-all; flex: 1; }
+
+    /* Coloring rules */
+    .log-text.step    { color: #8be9fd; }
+    .log-text.emerg   { color: var(--red); font-weight: 600; }
+    .log-text.ambul   { color: var(--orange); }
+    .log-text.ok      { color: var(--green); }
+    .log-text.warn    { color: var(--yellow); }
+    .log-text.info    { color: var(--accent2); }
+    .log-text.sep     { color: var(--muted); }
+
+    /* ── Right Panel ── */
+    .right-panel {
+      width: 340px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    /* Traffic gauge */
+    .gauge-section {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .gauge-section h3 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .gauge-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .gauge-item {
+      background: rgba(15,15,42,0.8);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .gauge-item label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+    .gauge-bar-wrap {
+      background: rgba(255,255,255,0.05);
+      border-radius: 4px;
+      height: 6px;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+    .gauge-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    .gauge-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    /* Direction cards */
+    .dir-section {
+      padding: 16px;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .dir-section h3 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .dir-card {
+      background: rgba(15,15,42,0.8);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      transition: border-color 0.3s;
+    }
+    .dir-card:hover { border-color: var(--accent2); }
+    .dir-name {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent2);
+      margin-bottom: 8px;
+    }
+    .dir-lanes { display: flex; gap: 6px; flex-wrap: wrap; }
+    .lane-pill {
+      background: rgba(100,255,218,0.1);
+      border: 1px solid rgba(100,255,218,0.2);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent);
+    }
+    .dir-total {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .dir-total span {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    /* Emergency alert */
+    #emerg-banner {
+      display: none;
+      margin: 8px 16px;
+      background: linear-gradient(135deg, #ff416c, #ff4b2b);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: white;
+      animation: pulse-banner 1.5s infinite;
+    }
+    @keyframes pulse-banner {
+      0%, 100% { box-shadow: 0 0 12px rgba(255,65,108,0.4); }
+      50%       { box-shadow: 0 0 24px rgba(255,65,108,0.7); }
+    }
+
+    /* Scrollbar */
+    .dir-section::-webkit-scrollbar { width: 4px; }
+    .dir-section::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* Footer */
+    footer {
+      padding: 6px 24px;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      font-size: 0.72rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🚦 TrafficFlow AI – GreenWave Live Monitor</h1>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <a href="http://localhost:8501" target="_blank" style="color:var(--accent2);font-size:0.82rem;text-decoration:none;border:1px solid var(--accent2);border-radius:8px;padding:4px 12px;">📊 Open Dashboard ↗</a>
+    <div class="live-badge"><div class="live-dot"></div> LIVE</div>
+  </div>
+</header>
+
+<!-- KPI Bar -->
+<div class="kpi-bar">
+  <div class="kpi">
+    <span class="kpi-label">Step</span>
+    <span class="kpi-value" id="kpi-step">—</span>
+  </div>
+  <div class="kpi">
+    <span class="kpi-label">Active Vehicles</span>
+    <span class="kpi-value green" id="kpi-active">—</span>
+  </div>
+  <div class="kpi">
+    <span class="kpi-label">Total Vehicles</span>
+    <span class="kpi-value" id="kpi-total">—</span>
+  </div>
+  <div class="kpi">
+    <span class="kpi-label">Efficiency</span>
+    <span class="kpi-value purple" id="kpi-eff">—</span>
+  </div>
+  <div class="kpi">
+    <span class="kpi-label">Cumulative Delay</span>
+    <span class="kpi-value orange" id="kpi-delay">—</span>
+  </div>
+  <div class="kpi">
+    <span class="kpi-label">CO₂ Saved</span>
+    <span class="kpi-value green" id="kpi-co2">—</span>
+  </div>
+  <div class="kpi">
+    <span class="kpi-label">Emergency Events</span>
+    <span class="kpi-value red" id="kpi-emerg">—</span>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <!-- Terminal -->
+  <div class="terminal-panel">
+    <div class="panel-header">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+      &nbsp; simulation_module/sim_engine.py — stdout
+      <span style="margin-left:auto;font-size:0.7rem;" id="line-count">0 lines</span>
+    </div>
+    <div id="terminal"></div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="right-panel">
+    <!-- Emergency banner -->
+    <div id="emerg-banner">🚑 AMBULANCE — Priority mode active!</div>
+
+    <!-- Mini gauges -->
+    <div class="gauge-section">
+      <h3>📈 Live Metrics</h3>
+      <div class="gauge-grid">
+        <div class="gauge-item">
+          <label>Efficiency</label>
+          <div class="gauge-bar-wrap"><div class="gauge-bar" id="bar-eff" style="width:0%;background:var(--accent);"></div></div>
+          <div class="gauge-num" id="g-eff" style="color:var(--accent);">0%</div>
+        </div>
+        <div class="gauge-item">
+          <label>Active/Total</label>
+          <div class="gauge-bar-wrap"><div class="gauge-bar" id="bar-ratio" style="width:0%;background:var(--accent2);"></div></div>
+          <div class="gauge-num" id="g-ratio" style="color:var(--accent2);">0%</div>
+        </div>
+        <div class="gauge-item">
+          <label>Junctions</label>
+          <div class="gauge-num" id="g-junc" style="color:var(--orange);">—</div>
+        </div>
+        <div class="gauge-item">
+          <label>Mode</label>
+          <div class="gauge-num" id="g-mode" style="color:var(--yellow);font-size:0.78rem;">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Direction breakdown -->
+    <div class="dir-section">
+      <h3>🚗 Multi-Lane Traffic (Last Update)</h3>
+      <div id="dir-cards">
+        <div style="color:var(--muted);font-size:0.8rem;text-align:center;margin-top:40px;">Waiting for simulation data...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>🚦 TrafficFlow AI – GreenWave v2.3 &nbsp;|&nbsp; SUMO + Streamlit + FastAPI</span>
+  <span>Dashboard: <a href="http://localhost:8501" target="_blank">localhost:8501</a> &nbsp;|&nbsp; API: <a href="http://localhost:9000/data" target="_blank">localhost:9000</a></span>
+</footer>
+
+<script>
+  const terminal  = document.getElementById('terminal');
+  const lineCount = document.getElementById('line-count');
+  let   totalLines = 0;
+  let   autoScroll = true;
+
+  terminal.addEventListener('scroll', () => {
+    const atBottom = terminal.scrollHeight - terminal.scrollTop - terminal.clientHeight < 50;
+    autoScroll = atBottom;
+  });
+
+  // ── Classify log line for color ──
+  function classify(text) {
+    if (/Step\s+\d+/.test(text))         return 'step';
+    if (/Ambulance detected|PRIORITY MODE|🚑/.test(text)) return 'ambul';
+    if (/Emergency handled|✅/.test(text)) return 'ok';
+    if (/Teleporting|Warning/.test(text)) return 'warn';
+    if (/═|─{3,}/.test(text))            return 'sep';
+    if (/ERROR|failed|FAILED/.test(text)) return 'emerg';
+    if (/Junction|corridor|Detected|Started|Mode/.test(text)) return 'info';
+    if (/SUMO|Simulation|✅/.test(text))  return 'ok';
+    return '';
+  }
+
+  function appendLine(text, ts) {
+    const d = new Date(ts * 1000);
+    const hms = d.toTimeString().slice(0,8);
+
+    const row = document.createElement('div');
+    row.className = 'log-line';
+
+    const tsSpan = document.createElement('span');
+    tsSpan.className = 'log-ts';
+    tsSpan.textContent = hms;
+
+    const txtSpan = document.createElement('span');
+    txtSpan.className = 'log-text ' + classify(text);
+    txtSpan.textContent = text;
+
+    row.appendChild(tsSpan);
+    row.appendChild(txtSpan);
+    terminal.appendChild(row);
+
+    totalLines++;
+    lineCount.textContent = totalLines + ' lines';
+
+    if (autoScroll) terminal.scrollTop = terminal.scrollHeight;
+  }
+
+  // ── Poll results.json via API ──
+  async function fetchStats() {
+    try {
+      const r = await fetch('http://localhost:9000/data');
+      if (!r.ok) return;
+      const data = await r.json();
+      if (!data || !data.simulation_steps) return;
+
+      document.getElementById('kpi-step').textContent   = data.simulation_steps?.toLocaleString() ?? '—';
+      document.getElementById('kpi-active').textContent = data.step_data?.slice(-1)[0]?.active_vehicles ?? '—';
+      document.getElementById('kpi-total').textContent  = data.total_vehicles?.toLocaleString() ?? '—';
+      document.getElementById('kpi-delay').textContent  = data.total_delay?.toLocaleString() + 's' ?? '—';
+      document.getElementById('kpi-co2').textContent    = (data.saved_co2_kg ?? 0).toFixed(1) + ' kg';
+      document.getElementById('kpi-emerg').textContent  = data.emergency_events?.length ?? 0;
+
+      const eff = data.efficiency ?? 0;
+      document.getElementById('kpi-eff').textContent  = eff.toFixed(1) + '%';
+      document.getElementById('g-eff').textContent    = eff.toFixed(1) + '%';
+      document.getElementById('bar-eff').style.width  = Math.min(eff, 100) + '%';
+
+      const active = data.step_data?.slice(-1)[0]?.active_vehicles ?? 0;
+      const total  = data.total_vehicles ?? 1;
+      const ratio  = Math.round(active / total * 100);
+      document.getElementById('g-ratio').textContent   = ratio + '%';
+      document.getElementById('bar-ratio').style.width = ratio + '%';
+
+      document.getElementById('g-junc').textContent = data.junction_count ?? '—';
+      document.getElementById('g-mode').textContent = (data.mode ?? '—').toUpperCase();
+
+      // Emergency banner
+      const banner = document.getElementById('emerg-banner');
+      if (data.ambulance_in_sim || data.emergency_active) {
+        banner.style.display = 'block';
+        banner.textContent = data.ambulance_in_sim
+          ? '🚑 AMBULANCE IN SIMULATION — Corridor priority active!'
+          : `🚑 EMERGENCY at ${(data.emergency_direction ?? '').toUpperCase()}`;
+      } else {
+        banner.style.display = 'none';
+      }
+
+      // Lane cards
+      const laneData = data.lane_data ?? {};
+      const dirs = ['north','south','east','west'];
+      const colors = {'north':'#64ffda','south':'#bd93f9','east':'#ffb86c','west':'#ff79c6'};
+      let html = '';
+      for (const d of dirs) {
+        const info = laneData[d];
+        if (!info) continue;
+        const lanes = (info.lanes ?? []).map(n =>
+          `<div class="lane-pill">${n}</div>`
+        ).join('');
+        html += `
+          <div class="dir-card">
+            <div class="dir-name" style="color:${colors[d]}">${d}</div>
+            <div class="dir-lanes">${lanes}</div>
+            <div class="dir-total">Total: <span>${info.total}</span></div>
+          </div>`;
+      }
+      if (html) document.getElementById('dir-cards').innerHTML = html;
+
+    } catch(e) { /* API not ready */ }
+  }
+
+  // ── SSE log stream ──
+  function connectSSE() {
+    const src = new EventSource('http://localhost:9000/stream');
+    src.onmessage = e => {
+      try {
+        const obj = JSON.parse(e.data);
+        appendLine(obj.line, obj.ts);
+      } catch {}
+    };
+    src.onerror = () => {
+      // SSE not available - fall back to polling log file style via stats
+      setTimeout(connectSSE, 3000);
+    };
+  }
+
+  // ── Synthetic log from results.json step_data ──
+  let lastSyntheticStep = 0;
+  async function syntheticLogs() {
+    try {
+      const r = await fetch('http://localhost:9000/data');
+      if (!r.ok) return;
+      const data = await r.json();
+      if (!data?.step_data) return;
+
+      const stepData = data.step_data;
+      const newEntries = stepData.filter(s => s.step > lastSyntheticStep);
+      for (const entry of newEntries) {
+        const ts = Date.now() / 1000;
+        appendLine(
+          `Step ${String(entry.step).padStart(6)} | Active: ${String(entry.active_vehicles).padStart(4)} | Idle: ${String(entry.idle_vehicles).padStart(4)} | Delay: ${String(entry.total_delay).padStart(8)} | Eff: ${entry.efficiency.toFixed(1)}%`,
+          ts
+        );
+        if (data.emergency_events?.some(ev => Math.abs(ev.step - entry.step) < 10)) {
+          appendLine(`  🚑 Ambulance detected — priority mode activated`, ts + 0.001);
+        }
+      }
+      if (newEntries.length > 0) {
+        lastSyntheticStep = newEntries[newEntries.length - 1].step;
+      }
+
+      // Show ambulance events
+      const mode = data.mode?.toUpperCase() ?? 'ADAPTIVE';
+      if (lastSyntheticStep === 0 && data.simulation_steps > 0) {
+        appendLine(`✅ SUMO Simulation Started (headless) — Mode: ${mode}`, Date.now()/1000);
+        appendLine(`🚦 Total junctions detected: ${data.junction_count ?? '?'}`, Date.now()/1000 + 0.001);
+        appendLine(`🔧 Running in ${mode} mode`, Date.now()/1000 + 0.002);
+        lastSyntheticStep = 1;
+      }
+    } catch {}
+  }
+
+  // ── Init ──
+  connectSSE();
+  setInterval(fetchStats, 1500);
+  setInterval(syntheticLogs, 2000);
+  fetchStats();
+
+  // Initial placeholder lines
+  appendLine('TrafficFlow AI – GreenWave Live Monitor', Date.now()/1000);
+  appendLine('Connecting to simulation engine...', Date.now()/1000 + 0.1);
+  appendLine('─────────────────────────────────────────────────', Date.now()/1000 + 0.2);
+</script>
+</body>
+</html>
